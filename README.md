@@ -35,7 +35,7 @@ Steps:
 ## How to run it
 
 ```
--bash-4.2$ nextflow bam_preprocessing.nf --help
+-bash-4.2$ nextflow main.nf --help
 N E X T F L O W  ~  version 19.07.0
 Launching `bam_preprocessing.nf` [intergalactic_shannon] - revision: e707c77d7b
 Usage:
