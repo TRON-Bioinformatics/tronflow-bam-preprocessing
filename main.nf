@@ -224,7 +224,21 @@ if (!params.skip_realignment) {
 	}
 }
 else {
-	realigned_bams = deduplicated_bams
+	process skipRealignmentAroundindels {
+		cpus 1
+		memory '16m'
+		tag "${name}"
+
+		input:
+		set name, bam_name, type, file(bam), file(bai) from deduplicated_bams
+
+		output:
+		set val(name), val(bam_name), val(type), file("${bam}"), file("${bai}") into realigned_bams
+
+		"""
+      	echo "ZZZZZ..."
+	    """
+	}
 }
 
 if (!params.skip_bqsr) {
@@ -232,7 +246,7 @@ if (!params.skip_bqsr) {
 	    cpus 3
 	    memory '4g'
 	    module 'java/1.8.0'		// GATK requires Java 8
-	    publishDir "${publish_dir}", mode: "move"
+	    publishDir "${publish_dir}", mode: "copy"
 	    tag "${name}"
 
 	    input:
@@ -266,7 +280,7 @@ else {
 	process createOutput {
 	    cpus 1
 	    memory '1g'
-	    publishDir "${publish_dir}", mode: "move"
+	    publishDir "${publish_dir}", mode: "copy"
 	    tag "${name}"
 
 	    input:
@@ -274,13 +288,13 @@ else {
 
 	    output:
 	    	set val("${name}"), val("${type}"), val("${publish_dir}/${bam_name}.preprocessed.bam") into recalibrated_bams
-		file "${bam_name}.preprocessed.bam" into recalibrated_bam
-		file "${bam_name}.preprocessed.bai" into recalibrated_bai
+			file "${bam_name}.preprocessed.bam" into recalibrated_bam
+			file "${bam_name}.preprocessed.bai" into recalibrated_bai
 
-	    """
-	    mv ${bam} ${bam_name}.preprocessed.bam
-	    mv ${bai} ${bam_name}.preprocessed.bai
-	    """
+		"""
+		cp ${bam} ${bam_name}.preprocessed.bam
+		cp ${bai} ${bam_name}.preprocessed.bai
+		"""
 	}
 }
 
