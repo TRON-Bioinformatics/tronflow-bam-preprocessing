@@ -142,12 +142,15 @@ if (!params.skip_deduplication) {
 	    cpus "${params.mark_duplicates_cpus}"
         memory "${params.mark_duplicates_memory}"
 	    tag "${name}"
+	    publishDir "${publish_dir}/${name}", mode: "copy", pattern: "*.dedup_metrics.txt"
 
 	    input:
 	    	set name, bam_name, type, file(bam), file(bai) from prepared_bams
 
 	    output:
-	    	set val(name), val(bam_name), val(type), file("${bam.baseName}.dedup.bam"), file("${bam.baseName}.dedup.bam.bai") into deduplicated_bams
+	    	set val(name), val(bam_name), val(type),
+	    	    file("${bam.baseName}.dedup.bam"), file("${bam.baseName}.dedup.bam.bai") into deduplicated_bams
+	    	file("${bam.baseName}.dedup_metrics.txt") into deduplication_metrics
 
 	    """
         gatk MarkDuplicatesSpark \
@@ -156,28 +159,11 @@ if (!params.skip_deduplication) {
         --output ${bam.baseName}.dedup.bam \
         --conf 'spark.executor.cores=${task.cpus}' \
         --metrics-file ${bam.baseName}.dedup_metrics.txt
-
-        mv ${bam.baseName}.dedup_metrics.txt ${publish_dir}
 	    """
 	}
 }
 else {
-    // TODO: this step could be totally removed if we copy over the output channel and ensure the index goes there
-	process skipMarkDuplicates {
-	    cpus "${params.skip_mark_duplicates_cpus}"
-        memory "${params.skip_mark_duplicates_memory}"
-	    tag "${name}"
-
-	    input:
-	    	set name, bam_name, type, file(bam), file(bai) from prepared_bams
-
-	    output:
-	    	set val(name), val(bam_name), val(type), file("${bam}"), file("${bai}") into deduplicated_bams
-
-	    """
-	    echo "zzzzz"
-	    """
-	}
+    deduplicated_bams = prepared_bams
 }
 
 if (!params.skip_realignment) {
@@ -185,12 +171,14 @@ if (!params.skip_realignment) {
 	    cpus "${params.realignment_around_indels_cpus}"
         memory "${params.realignment_around_indels_memory}"
 	    tag "${name}"
+	    publishDir "${publish_dir}/${name}", mode: "copy", pattern: "*.RA.intervals"
 
 	    input:
 	    	set name, bam_name, type, file(bam), file(bai) from deduplicated_bams
 
 	    output:
 	    	set val(name), val(bam_name), val(type), file("${bam.baseName}.realigned.bam"), file("${bam.baseName}.realigned.bai") into realigned_bams
+	    	file("${bam.baseName}.RA.intervals") into realignment_intervals
 
 	    """
 	    gatk3 -Xmx${params.realignment_around_indels_memory} -T RealignerTargetCreator \
@@ -210,41 +198,25 @@ if (!params.skip_realignment) {
 	    --consensusDeterminationModel USE_SW \
 	    --LODThresholdForCleaning 0.4 \
 	    --maxReadsInMemory 600000
-
-      mv ${bam.baseName}.RA.intervals ${publish_dir}
 	    """
 	}
 }
 else {
-	process skipRealignmentAroundindels {
-		cpus 1
-		memory '16m'
-		tag "${name}"
-
-		input:
-		set name, bam_name, type, file(bam), file(bai) from deduplicated_bams
-
-		output:
-		set val(name), val(bam_name), val(type), file("${bam}"), file("${bai}") into realigned_bams
-
-		"""
-      	echo "ZZZZZ..."
-	    """
-	}
+    realigned_bams = deduplicated_bams
 }
 
 if (!params.skip_bqsr) {
 	process baseQualityScoreRecalibration {
 	    cpus "${params.bqsr_cpus}"
         memory "${params.bqsr_memory}"
-	    publishDir "${publish_dir}", mode: "copy"
+	    publishDir "${publish_dir}/${name}", mode: "copy"
 	    tag "${name}"
 
 	    input:
 	    	set name, bam_name, type, file(bam), file(bai) from realigned_bams
 
 	    output:
-	    	set val("${name}"), val("${type}"), val("${publish_dir}/${bam_name}.preprocessed.bam") into recalibrated_bams
+	    	set val("${name}"), val("${type}"), val("${publish_dir}/${name}/${bam_name}.preprocessed.bam") into recalibrated_bams
             file "${bam_name}.recalibration_report.grp" into recalibration_report
             file "${bam_name}.preprocessed.bam" into recalibrated_bam
             file "${bam_name}.preprocessed.bai" into recalibrated_bai
@@ -270,14 +242,14 @@ else {
 	process createOutput {
 	    cpus 1
 	    memory '1g'
-	    publishDir "${publish_dir}", mode: "copy"
+	    publishDir "${publish_dir}/${name}", mode: "copy"
 	    tag "${name}"
 
 	    input:
 	    	set name, bam_name, type, file(bam), file(bai) from realigned_bams
 
 	    output:
-	    	set val("${name}"), val("${type}"), val("${publish_dir}/${bam_name}.preprocessed.bam") into recalibrated_bams
+	    	set val("${name}"), val("${type}"), val("${publish_dir}/${name}/${bam_name}.preprocessed.bam") into recalibrated_bams
 			file "${bam_name}.preprocessed.bam" into recalibrated_bam
 			file "${bam_name}.preprocessed.bai" into recalibrated_bai
 
