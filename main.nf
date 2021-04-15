@@ -3,10 +3,10 @@
 publish_dir = 'output'
 params.help= false
 params.input_files = false
-params.reference = "/projects/data/gatk_bundle/hg19/ucsc.hg19.fasta"						// TODO: remove this hard coded bit
-params.dbsnp = "/projects/data/gatk_bundle/hg19/dbsnp_138.hg19.vcf" 							// TODO: remove this hard coded bit
-params.known_indels1 = "/projects/data/gatk_bundle/hg19/1000G_phase1.indels.hg19.sites.vcf"			// TODO: remove this hard coded bit
-params.known_indels2 = "/projects/data/gatk_bundle/hg19/Mills_and_1000G_gold_standard.indels.hg19.sites.sorted.vcf"	// TODO: remove this hard coded bit
+params.reference = "/projects/data/gatk_bundle/hg19/ucsc.hg19.fasta"
+params.dbsnp = "/projects/data/gatk_bundle/hg19/dbsnp_138.hg19.vcf"
+params.known_indels1 = "/projects/data/gatk_bundle/hg19/1000G_phase1.indels.hg19.sites.vcf"
+params.known_indels2 = "/projects/data/gatk_bundle/hg19/Mills_and_1000G_gold_standard.indels.hg19.sites.sorted.vcf"
 params.skip_bqsr = false
 params.skip_realignment = false
 params.skip_deduplication = false
@@ -15,10 +15,8 @@ params.platform = "ILLUMINA"
 
 params.prepare_bam_cpus = 3
 params.prepare_bam_memory = "8g"
-params.mark_duplicates_cpus = 8
+params.mark_duplicates_cpus = 16
 params.mark_duplicates_memory = "64g"
-params.skip_mark_duplicates_cpus = 1
-params.skip_mark_duplicates_memory = "4g"
 params.realignment_around_indels_cpus = 2
 params.realignment_around_indels_memory = "32g"
 params.bqsr_cpus = 3
@@ -51,6 +49,14 @@ Optional input:
     * skip_deduplication: optionally skip deduplication
     * output: the folder where to publish output
     * platform: the platform to be added to the BAM header. Valid values: [ILLUMINA, SOLID, LS454, HELICOS and PACBIO] (default: ILLUMINA)
+    * prepare_bam_cpus: default 3
+    * prepare_bam_memory: default 8g
+    * mark_duplicates_cpus: default 16
+    * mark_duplicates_memory: default 64g
+    * realignment_around_indels_cpus: default 2
+    * realignment_around_indels_memory: default 32g
+    * bqsr_cpus: default 3
+    * bqsr_memory: default 4g
 
 Output:
     * Preprocessed and indexed BAM
@@ -59,6 +65,7 @@ Output:
 Optional output:
     * Recalibration report
     * Realignment intervals
+    * Duplication metrics
     """
 }
 
