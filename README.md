@@ -1,4 +1,4 @@
-# tron-bam-preprocessing
+# TRONflow BAM preprocessing pipeline
 
 Nextflow pipeline for the preprocessing of BAM files based on Picard and GATK.
 
@@ -9,7 +9,6 @@ In order to have a variant calling ready BAM file there are a number of operatio
 
 GATK has been providing a well known best practices document on BAM preprocessing, the latest best practices for GATK4 (https://software.broadinstitute.org/gatk/best-practices/workflow?id=11165) does not perform anymore realignment around indels as opposed to best practices for GATK3 (https://software.broadinstitute.org/gatk/documentation/article?id=3238). This pipeline is based on both Picard and GATK. These best practices have been implemented a number of times, see for instance this implementation in Workflow Definition Language https://github.com/gatk-workflows/gatk4-data-processing/blob/master/processing-for-variant-discovery-gatk4.wdl.
 
-At TRON we have a number of implementations of the BAM preprocessing pipeline, each one of those varies depending on the context. For instance, the script to run mutect has this pipeline embedded, see /code/iCaM/scripts/mutect.sh. This is repeated in some other places.
 
 ## Objectives
 
@@ -35,13 +34,11 @@ Steps:
 ## How to run it
 
 ```
--bash-4.2$ nextflow main.nf --help
+$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.0.0 --help
 N E X T F L O W  ~  version 19.07.0
-Launching `bam_preprocessing.nf` [intergalactic_shannon] - revision: e707c77d7b
+Launching `main.nf` [intergalactic_shannon] - revision: e707c77d7b
 Usage:
-    bam_preprocessing.nf --input_files input_files
- 
-This workflow is based on the implementation at /code/iCaM/scripts/mutect.sh
+    main.nf --input_files input_files
  
 Input:
     * input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file
