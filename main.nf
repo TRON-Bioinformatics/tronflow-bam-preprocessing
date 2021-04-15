@@ -96,7 +96,8 @@ process prepareBam {
     	set name, type, file(bam) from input_files
 
     output:
-      set val(name), val("${bam.baseName}"), val(type), file("${bam.baseName}.prepared.bam")  into prepared_bams
+      set val(name), val("${bam.baseName}"), val(type),
+        file("${bam.baseName}.prepared.bam"), file("${bam.baseName}.prepared.bai")  into prepared_bams
 
     """
     gatk CleanSam \
@@ -143,7 +144,7 @@ if (!params.skip_deduplication) {
 	    tag "${name}"
 
 	    input:
-	    	set name, bam_name, type, file(bam) from prepared_bams
+	    	set name, bam_name, type, file(bam), file(bai) from prepared_bams
 
 	    output:
 	    	set val(name), val(bam_name), val(type), file("${bam.baseName}.dedup.bam"), file("${bam.baseName}.dedup.bam.bai") into deduplicated_bams
@@ -168,13 +169,13 @@ else {
 	    tag "${name}"
 
 	    input:
-	    	set name, bam_name, type, file(bam) from prepared_bams
+	    	set name, bam_name, type, file(bam), file(bai) from prepared_bams
 
 	    output:
-	    	set val(name), val(bam_name), val(type), file("${bam}"), file("${bam.baseName}.bam.bai") into deduplicated_bams
+	    	set val(name), val(bam_name), val(type), file("${bam}"), file("${bai}") into deduplicated_bams
 
 	    """
-	    samtools index ${bam}
+	    echo "zzzzz"
 	    """
 	}
 }
