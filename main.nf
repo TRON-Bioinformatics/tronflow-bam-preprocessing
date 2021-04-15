@@ -103,22 +103,16 @@ process prepareBam {
     gatk CleanSam \
     --java-options '-Xmx${params.prepare_bam_memory}' \
     --INPUT ${bam} \
-    --OUTPUT ${bam.baseName}.cleaned.bam \
-    --CREATE_INDEX true
-
+    --OUTPUT /dev/stdout | \
     gatk ReorderSam \
     --java-options '-Xmx${params.prepare_bam_memory}' \
-    --INPUT ${bam.baseName}.cleaned.bam \
-    --OUTPUT ${bam.baseName}.reordered.bam \
-    --SEQUENCE_DICTIONARY ${params.reference} \
-    --CREATE_INDEX true
-
-    rm -f ${bam.baseName}.cleaned.bam
-
+    --INPUT /dev/stdin \
+    --OUTPUT /dev/stdout \
+    --SEQUENCE_DICTIONARY ${params.reference} | \
     gatk AddOrReplaceReadGroups \
     --java-options '-Xmx${params.prepare_bam_memory}' \
     --VALIDATION_STRINGENCY SILENT \
-    --INPUT ${bam.baseName}.reordered.bam \
+    --INPUT /dev/stdin \
     --OUTPUT ${bam.baseName}.prepared.bam \
     --REFERENCE_SEQUENCE ${params.reference} \
     --RGPU 1 \
@@ -128,8 +122,6 @@ process prepareBam {
     --RGPL ${params.platform} \
     --SORT_ORDER coordinate \
     --CREATE_INDEX true
-
-    rm -f ${bam.baseName}.reordered.bam
     """
 }
 
