@@ -107,17 +107,19 @@ process prepareBam {
         file("${bam.baseName}.prepared.bam"), file("${bam.baseName}.prepared.bai")  into prepared_bams
 
     """
+    mkdir tmp
+
     gatk CleanSam \
-    --java-options '-Xmx${params.prepare_bam_memory}' \
+    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
     --INPUT ${bam} \
     --OUTPUT /dev/stdout | \
     gatk ReorderSam \
-    --java-options '-Xmx${params.prepare_bam_memory}' \
+    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
     --INPUT /dev/stdin \
     --OUTPUT /dev/stdout \
     --SEQUENCE_DICTIONARY ${params.reference} | \
     gatk AddOrReplaceReadGroups \
-    --java-options '-Xmx${params.prepare_bam_memory}' \
+    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
     --VALIDATION_STRINGENCY SILENT \
     --INPUT /dev/stdin \
     --OUTPUT ${bam.baseName}.prepared.bam \
@@ -129,6 +131,8 @@ process prepareBam {
     --RGPL ${params.platform} \
     --SORT_ORDER coordinate \
     --CREATE_INDEX true
+
+    rm -rf tmp
     """
 }
 
@@ -152,12 +156,16 @@ if (!params.skip_deduplication) {
 	    	file("${bam.baseName}.dedup_metrics.txt") into deduplication_metrics
 
 	    """
+	    mkdir tmp
+
         gatk MarkDuplicatesSpark \
-        --java-options '-Xmx${params.mark_duplicates_memory}' \
+        --java-options '-Xmx${params.mark_duplicates_memory}  -Djava.io.tmpdir=tmp' \
         --input  ${bam} \
         --output ${bam.baseName}.dedup.bam \
         --conf 'spark.executor.cores=${task.cpus}' \
         --metrics-file ${bam.baseName}.dedup_metrics.txt
+
+        rm -rf tmp
 	    """
 	}
 }
@@ -180,14 +188,16 @@ if (!params.skip_realignment) {
 	    	file("${bam.baseName}.RA.intervals") into realignment_intervals
 
 	    """
-	    gatk3 -Xmx${params.realignment_around_indels_memory} -T RealignerTargetCreator \
+	    mkdir tmp
+
+	    gatk3 -Xmx${params.realignment_around_indels_memory} -Djava.io.tmpdir=tmp -T RealignerTargetCreator \
 	    --input_file ${bam} \
 	    --out ${bam.baseName}.RA.intervals \
 	    --reference_sequence ${params.reference} \
 	    --known ${params.known_indels1} \
 	    --known ${params.known_indels2}
 
-	    gatk3 -Xmx${params.realignment_around_indels_memory} -T IndelRealigner \
+	    gatk3 -Xmx${params.realignment_around_indels_memory} -Djava.io.tmpdir=tmp -T IndelRealigner \
 	    --input_file ${bam} \
 	    --out ${bam.baseName}.realigned.bam \
 	    --reference_sequence ${params.reference} \
@@ -197,6 +207,8 @@ if (!params.skip_realignment) {
 	    --consensusDeterminationModel USE_SW \
 	    --LODThresholdForCleaning 0.4 \
 	    --maxReadsInMemory 600000
+
+	    rm -rf tmp
 	    """
 	}
 }
@@ -221,19 +233,23 @@ if (!params.skip_bqsr) {
             file "${bam_name}.preprocessed.bai" into recalibrated_bai
 
 	    """
+	    mkdir tmp
+
 	    gatk BaseRecalibrator \
-	    --java-options '-Xmx${params.bqsr_memory}' \
+	    --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=tmp' \
 	    --input ${bam} \
 	    --output ${bam_name}.recalibration_report.grp \
 	    --reference ${params.reference} \
 	    --known-sites ${params.dbsnp}
 
 	    gatk ApplyBQSR \
-	    --java-options '-Xmx${params.bqsr_memory}' \
+	    --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=tmp' \
 	    --input ${bam} \
 	    --output ${bam_name}.preprocessed.bam \
 	    --reference ${params.reference} \
 	    --bqsr-recal-file ${bam_name}.recalibration_report.grp
+
+	    rm -rf tmp
 	    """
 	}
 }
