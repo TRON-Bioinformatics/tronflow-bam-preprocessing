@@ -1,6 +1,5 @@
 clean:
 	rm -rf output
-	#rm -rf work
 	rm -f report.html*
 	rm -f timeline.html*
 	rm -f trace.txt*
