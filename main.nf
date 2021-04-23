@@ -10,6 +10,7 @@ params.known_indels2 = "/projects/data/gatk_bundle/hg19/Mills_and_1000G_gold_sta
 params.skip_bqsr = false
 params.skip_realignment = false
 params.skip_deduplication = false
+params.skip_metrics = false
 params.output = false
 params.platform = "ILLUMINA"
 
@@ -47,6 +48,7 @@ Optional input:
     * skip_bqsr: optionally skip BQSR
     * skip_realignment: optionally skip realignment
     * skip_deduplication: optionally skip deduplication
+    * skip_metrics: optionally skip the calculation of metrics from the BAM
     * output: the folder where to publish output
     * platform: the platform to be added to the BAM header. Valid values: [ILLUMINA, SOLID, LS454, HELICOS and PACBIO] (default: ILLUMINA)
     * prepare_bam_cpus: default 3
@@ -103,8 +105,10 @@ process prepareBam {
     	set name, type, file(bam) from input_files
 
     output:
-      set val(name), val("${bam.baseName}"), val(type),
-        file("${bam.baseName}.prepared.bam"), file("${bam.baseName}.prepared.bai")  into prepared_bams
+      set val(name),
+        val("${bam.baseName}"),
+        val(type), file("${bam.baseName}.prepared.bam"),
+        file("${bam.baseName}.prepared.bai")  into prepared_bams, prepared_bams_for_metrics
 
     """
     mkdir tmp
@@ -145,7 +149,7 @@ if (!params.skip_deduplication) {
 	    cpus "${params.mark_duplicates_cpus}"
         memory "${params.mark_duplicates_memory}"
 	    tag "${name}"
-	    publishDir "${publish_dir}/${name}", mode: "copy", pattern: "*.dedup_metrics.txt"
+	    publishDir "${publish_dir}/${name}/metrics", mode: "copy", pattern: "*.dedup_metrics"
 
 	    input:
 	    	set name, bam_name, type, file(bam), file(bai) from prepared_bams
@@ -153,7 +157,7 @@ if (!params.skip_deduplication) {
 	    output:
 	    	set val(name), val(bam_name), val(type),
 	    	    file("${bam.baseName}.dedup.bam"), file("${bam.baseName}.dedup.bam.bai") into deduplicated_bams
-	    	file("${bam.baseName}.dedup_metrics.txt") into deduplication_metrics
+	    	file("${bam.baseName}.dedup_metrics") into deduplication_metrics
 
 	    """
 	    mkdir tmp
@@ -163,7 +167,7 @@ if (!params.skip_deduplication) {
         --input  ${bam} \
         --output ${bam.baseName}.dedup.bam \
         --conf 'spark.executor.cores=${task.cpus}' \
-        --metrics-file ${bam.baseName}.dedup_metrics.txt
+        --metrics-file ${bam.baseName}.dedup_metrics
 
         rm -rf tmp
 	    """
@@ -171,6 +175,42 @@ if (!params.skip_deduplication) {
 }
 else {
     deduplicated_bams = prepared_bams
+}
+
+if (! params.skip_metrics) {
+    process metrics {
+	    cpus 1
+        memory "2g"
+	    tag "${name}"
+	    publishDir "${publish_dir}/${name}/metrics", mode: "copy"
+
+	    input:
+	    	set name, bam_name, type, file(bam), file(bai) from prepared_bams_for_metrics
+
+	    output:
+	        file("*_metrics") optional true into txt_metrics
+	        file("*.pdf") optional true into pdf_metrics
+
+	    """
+	    mkdir tmp
+
+	    gatk CollectMultipleMetrics \
+        --java-options '-Xmx2g  -Djava.io.tmpdir=tmp' \
+        --INPUT  ${bam} \
+        --OUTPUT ${bam.baseName} \
+        --REFERENCE_SEQUENCE ${params.reference} \
+        --PROGRAM QualityScoreDistribution \
+        --PROGRAM MeanQualityByCycle \
+        --PROGRAM CollectAlignmentSummaryMetrics \
+        --PROGRAM CollectBaseDistributionByCycle \
+        --PROGRAM CollectGcBiasMetrics \
+        --PROGRAM CollectInsertSizeMetrics \
+        --PROGRAM CollectSequencingArtifactMetrics \
+        --PROGRAM CollectSequencingArtifactMetrics
+
+        rm -rf tmp
+	    """
+	}
 }
 
 if (!params.skip_realignment) {
