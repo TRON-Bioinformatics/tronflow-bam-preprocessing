@@ -67,7 +67,7 @@ Output:
 Optional output:
     * Recalibration report
     * Realignment intervals
-    * Duplication metrics
+    * Metrics
     """
 }
 

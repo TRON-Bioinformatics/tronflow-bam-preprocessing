@@ -23,9 +23,10 @@ Steps:
 * **Clean BAM**. Sets the mapping quality to 0 for all unmapped reads and avoids soft clipping going beyond the reference genome boundaries. Implemented in Picard
 * **Reorder chromosomes**. Makes the chromosomes in the BAM follow the same order as the reference genome. Implemented in Picard
 * **Add read groups**. GATK requires that some headers are adde to the BAM, also we want to flag somehow the normal and tumor BAMs in the header as some callers, such as Mutect2 require it. Implemented in Picard.
- * **Mark duplicates** (optional). Identify the PCR and the optical duplications and marks those reads. This uses the parallelized version on Spark, it is reported to scale linearly up to 16 CPUs.
- * **Realignment around indels** (optional). This procedure is important for locus based variant callers, but for any variant caller doing haplotype assembly it is not needed. This is computing intensive as it first finds regions for realignment where there are indication of indels  and then it performs a local realignment over those regions. Implemented in GATK3, deprecated in GATK4
- * **Base Quality Score Recalibration (BQSR)** (optional). It aims at correcting systematic errors in the sequencer when assigning the base call quality errors, as these scores are used by variant callers it improves variant calling in some situations. Implemented in GATK4
+* **Mark duplicates** (optional). Identify the PCR and the optical duplications and marks those reads. This uses the parallelized version on Spark, it is reported to scale linearly up to 16 CPUs.
+* **Realignment around indels** (optional). This procedure is important for locus based variant callers, but for any variant caller doing haplotype assembly it is not needed. This is computing intensive as it first finds regions for realignment where there are indication of indels  and then it performs a local realignment over those regions. Implemented in GATK3, deprecated in GATK4
+* **Base Quality Score Recalibration (BQSR)** (optional). It aims at correcting systematic errors in the sequencer when assigning the base call quality errors, as these scores are used by variant callers it improves variant calling in some situations. Implemented in GATK4
+* **Metrics** (optional). A number of metrics are obtained over the BAM file with Picard's CollectMetrics (eg: duplication, insert size, alignment, etc.).
 
 ![Pipeline](bam_preprocessing2.png)
 
@@ -56,6 +57,7 @@ Optional input:
     * skip_bqsr: optionally skip BQSR
     * skip_realignment: optionally skip realignment
     * skip_deduplication: optionally skip deduplication
+    * skip_metrics: optionally skip metrics
     * output: the folder where to publish output, if not provided they will be moved to "output" folder inside the workflow folder* prepare_bam_cpus: default 3
     * platform: the platform to be added to the BAM header. Valid values: [ILLUMINA, SOLID, LS454, HELICOS and PACBIO] (default: ILLUMINA)
     * prepare_bam_memory: default 8g
@@ -73,5 +75,5 @@ Optional input:
 Optional output:
     * Recalibration report
     * Realignment intervals
-    * Duplication metrics
+    * Metrics
 ```
