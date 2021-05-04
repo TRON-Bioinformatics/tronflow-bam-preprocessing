@@ -7,6 +7,7 @@ params.reference = "/projects/data/gatk_bundle/hg19/ucsc.hg19.fasta"
 params.dbsnp = "/projects/data/gatk_bundle/hg19/dbsnp_138.hg19.vcf"
 params.known_indels1 = "/projects/data/gatk_bundle/hg19/1000G_phase1.indels.hg19.sites.vcf"
 params.known_indels2 = "/projects/data/gatk_bundle/hg19/Mills_and_1000G_gold_standard.indels.hg19.sites.sorted.vcf"
+params.intervals = false
 params.skip_bqsr = false
 params.skip_realignment = false
 params.skip_deduplication = false
@@ -28,40 +29,45 @@ params.bqsr_memory = "4g"
 def helpMessage() {
     log.info"""
 Usage:
-    bam_preprocessing.nf --input_files input_files --reference reference.fasta
+    main.nf --input_files input_files
 
 Input:
-    * input_files: the path to a tab-separated values file containing in each row the sample name, sample type (tumor or normal) and path to the BAM file
+    * --input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file
     Sample type will be added to the BAM header @SN sample name
     The input file does not have header!
     Example input file:
-    name1	tumor	tumor.1.bam
-    name1	normal	normal.1.bam
-    name2	tumor	tumor.2.bam
+    name1       tumor   tumor.1.bam
+    name1       normal  normal.1.bam
+    name2       tumor   tumor.2.bam
 
 Optional input:
-    * reference: path to the FASTA genome reference (indexes expected *.fai, *.dict)
-    * dbsnp: path to the dbSNP VCF
-    * known_indels1: path to a VCF of known indels
-    * known_indels2: path to a second VCF of known indels
-    * NOTE: if any of the above parameters is not provided, default hg19 resources will be used
-    * skip_bqsr: optionally skip BQSR
-    * skip_realignment: optionally skip realignment
-    * skip_deduplication: optionally skip deduplication
-    * skip_metrics: optionally skip the calculation of metrics from the BAM
-    * output: the folder where to publish output
-    * platform: the platform to be added to the BAM header. Valid values: [ILLUMINA, SOLID, LS454, HELICOS and PACBIO] (default: ILLUMINA)
-    * prepare_bam_cpus: default 3
-    * prepare_bam_memory: default 8g
-    * mark_duplicates_cpus: default 16
-    * mark_duplicates_memory: default 64g
-    * realignment_around_indels_cpus: default 2
-    * realignment_around_indels_memory: default 32g
-    * bqsr_cpus: default 3
-    * bqsr_memory: default 4g
+    * --reference: path to the FASTA genome reference (indexes expected *.fai, *.dict)
+    * --dbsnp: path to the dbSNP VCF
+    * --known_indels1: path to a VCF of known indels
+    * --known_indels2: path to a second VCF of known indels
+    **NOTE**: if any of the above parameters is not provided, default hg19 resources under
+    /projects/data/gatk_bundle/hg19/ will be used
 
-Output:
-    * Preprocessed and indexed BAM
+    * --intervals: path to an intervals file to collect HS metrics from, this can be built with Picard's BedToIntervalList (default: None)
+    * --skip_bqsr: optionally skip BQSR (default: false)
+    * --skip_realignment: optionally skip realignment (default: false)
+    * --skip_deduplication: optionally skip deduplication (default: false)
+    * --skip_metrics: optionally skip metrics (default: false)
+    * --output: the folder where to publish output (default: ./output)
+    * --platform: the platform to be added to the BAM header. Valid values: [ILLUMINA, SOLID, LS454, HELICOS and PACBIO] (default: ILLUMINA)
+
+Computational resources:
+    * --prepare_bam_cpus: (default: 3)
+    * --prepare_bam_memory: (default: 8g)
+    * --mark_duplicates_cpus: (default: 16)
+    * --mark_duplicates_memory: (default: 64g)
+    * --realignment_around_indels_cpus: (default: 2)
+    * --realignment_around_indels_memory: (default: 32g)
+    * --bqsr_cpus: (default: 3)
+    * --bqsr_memory: (default: 4g)
+
+ Output:
+    * Preprocessed and indexed BAMs
     * Tab-separated values file with the absolute paths to the preprocessed BAMs, preprocessed_bams.txt
 
 Optional output:
@@ -108,7 +114,7 @@ process prepareBam {
       set val(name),
         val("${bam.baseName}"),
         val(type), file("${bam.baseName}.prepared.bam"),
-        file("${bam.baseName}.prepared.bai")  into prepared_bams, prepared_bams_for_metrics
+        file("${bam.baseName}.prepared.bai")  into prepared_bams, prepared_bams_for_metrics, prepared_bams_for_hs_metrics
 
     """
     mkdir tmp
@@ -135,8 +141,6 @@ process prepareBam {
     --RGPL ${params.platform} \
     --SORT_ORDER coordinate \
     --CREATE_INDEX true
-
-    rm -rf tmp
     """
 }
 
@@ -157,8 +161,10 @@ if (!params.skip_deduplication) {
 	    output:
 	    	set val(name), val(bam_name), val(type),
 	    	    file("${bam.baseName}.dedup.bam"), file("${bam.baseName}.dedup.bam.bai") into deduplicated_bams
-	    	file("${bam.baseName}.dedup_metrics") into deduplication_metrics
+	    	file("${bam.baseName}.dedup_metrics") optional true into deduplication_metrics
 
+        script:
+        dedup_metrics = params.skip_metrics ? "--metrics-file ${bam.baseName}.dedup_metrics" : ""
 	    """
 	    mkdir tmp
 
@@ -167,9 +173,7 @@ if (!params.skip_deduplication) {
         --input  ${bam} \
         --output ${bam.baseName}.dedup.bam \
         --conf 'spark.executor.cores=${task.cpus}' \
-        --metrics-file ${bam.baseName}.dedup_metrics
-
-        rm -rf tmp
+        ${dedup_metrics}
 	    """
 	}
 }
@@ -178,6 +182,35 @@ else {
 }
 
 if (! params.skip_metrics) {
+
+    if (params.intervals) {
+
+        process hsMetrics {
+            cpus 1
+            memory "2g"
+            tag "${name}"
+            publishDir "${publish_dir}/${name}/metrics", mode: "copy"
+
+            input:
+                set name, bam_name, type, file(bam), file(bai) from prepared_bams_for_hs_metrics
+
+            output:
+                file("*_metrics") optional true into txt_hs_metrics
+                file("*.pdf") optional true into pdf_hs_metrics
+
+            """
+            mkdir tmp
+
+            gatk CollectHsMetrics \
+            --java-options '-Xmx2g  -Djava.io.tmpdir=tmp' \
+            --INPUT  ${bam} \
+            --OUTPUT ${bam.baseName} \
+            --TARGET_INTERVALS ${params.intervals} \
+            --BAIT_INTERVALS ${params.intervals}
+            """
+        }
+    }
+
     process metrics {
 	    cpus 1
         memory "2g"
@@ -207,8 +240,6 @@ if (! params.skip_metrics) {
         --PROGRAM CollectInsertSizeMetrics \
         --PROGRAM CollectSequencingArtifactMetrics \
         --PROGRAM CollectSequencingArtifactMetrics
-
-        rm -rf tmp
 	    """
 	}
 }
@@ -247,8 +278,6 @@ if (!params.skip_realignment) {
 	    --consensusDeterminationModel USE_SW \
 	    --LODThresholdForCleaning 0.4 \
 	    --maxReadsInMemory 600000
-
-	    rm -rf tmp
 	    """
 	}
 }
@@ -288,8 +317,6 @@ if (!params.skip_bqsr) {
 	    --output ${bam_name}.preprocessed.bam \
 	    --reference ${params.reference} \
 	    --bqsr-recal-file ${bam_name}.recalibration_report.grp
-
-	    rm -rf tmp
 	    """
 	}
 }

@@ -13,3 +13,4 @@ test:
 	nextflow main.nf -profile test,conda --skip_realignment --output output/test3
 	nextflow main.nf -profile test,conda --skip_deduplication --output output/test4
 	nextflow main.nf -profile test,conda --output output/test5 --skip_metrics
+	nextflow main.nf -profile test,conda --output output/test6 --intervals false
