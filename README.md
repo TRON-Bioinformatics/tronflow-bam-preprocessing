@@ -65,6 +65,8 @@ Optional input:
     /projects/data/gatk_bundle/hg19/ will be used
     
     * --intervals: path to an intervals file to collect HS metrics from, this can be built with Picard's BedToIntervalList (default: None)
+    * --hs_metrics_target_coverage: name of output file for target HS metrics (default: None)
+    * --hs_metrics_per_base_coverage: name of output file for per base HS metrics (default: None)
     * --skip_bqsr: optionally skip BQSR (default: false)
     * --skip_realignment: optionally skip realignment (default: false)
     * --skip_deduplication: optionally skip deduplication (default: false)

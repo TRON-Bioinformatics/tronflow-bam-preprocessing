@@ -8,6 +8,8 @@ params.dbsnp = "/projects/data/gatk_bundle/hg19/dbsnp_138.hg19.vcf"
 params.known_indels1 = "/projects/data/gatk_bundle/hg19/1000G_phase1.indels.hg19.sites.vcf"
 params.known_indels2 = "/projects/data/gatk_bundle/hg19/Mills_and_1000G_gold_standard.indels.hg19.sites.sorted.vcf"
 params.intervals = false
+params.hs_metrics_target_coverage = false
+params.hs_metrics_per_base_coverage = false
 params.skip_bqsr = false
 params.skip_realignment = false
 params.skip_deduplication = false
@@ -49,6 +51,8 @@ Optional input:
     /projects/data/gatk_bundle/hg19/ will be used
 
     * --intervals: path to an intervals file to collect HS metrics from, this can be built with Picard's BedToIntervalList (default: None)
+    * --hs_metrics_target_coverage: name of output file for target HS metrics (default: None)
+    * --hs_metrics_per_base_coverage: name of output file for per base HS metrics (default: None)
     * --skip_bqsr: optionally skip BQSR (default: false)
     * --skip_realignment: optionally skip realignment (default: false)
     * --skip_deduplication: optionally skip deduplication (default: false)
@@ -197,7 +201,16 @@ if (! params.skip_metrics) {
             output:
                 file("*_metrics") optional true into txt_hs_metrics
                 file("*.pdf") optional true into pdf_hs_metrics
+                file(params.hs_metrics_target_coverage) optional true into target_hs_metrics
+                file(params.hs_metrics_per_base_coverage) optional true into per_base_hs_metrics
 
+            script:
+            hs_metrics_target_coverage= params.hs_metrics_target_coverage ?
+                "--PER_TARGET_COVERAGE ${params.hs_metrics_target_coverage} --REFERENCE_SEQUENCE ${params.reference}" :
+                ""
+            hs_metrics_per_base_coverage= params.hs_metrics_per_base_coverage ?
+                "--PER_BASE_COVERAGE ${params.hs_metrics_per_base_coverage}" :
+                ""
             """
             mkdir tmp
 
@@ -206,7 +219,8 @@ if (! params.skip_metrics) {
             --INPUT  ${bam} \
             --OUTPUT ${bam.baseName} \
             --TARGET_INTERVALS ${params.intervals} \
-            --BAIT_INTERVALS ${params.intervals}
+            --BAIT_INTERVALS ${params.intervals} \
+            ${hs_metrics_target_coverage} ${hs_metrics_per_base_coverage}
             """
         }
     }
