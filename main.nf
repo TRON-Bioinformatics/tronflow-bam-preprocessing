@@ -16,7 +16,10 @@ params.skip_deduplication = false
 params.skip_metrics = false
 params.output = false
 params.platform = "ILLUMINA"
+params.collect_hs_metrics_min_base_quality = false
+params.collect_hs_metrics_min_mapping_quality = false
 
+// computational resources
 params.prepare_bam_cpus = 3
 params.prepare_bam_memory = "8g"
 params.mark_duplicates_cpus = 16
@@ -170,6 +173,10 @@ if (! params.skip_metrics) {
             hs_metrics_per_base_coverage= params.hs_metrics_per_base_coverage ?
                 "--PER_BASE_COVERAGE ${params.hs_metrics_per_base_coverage}" :
                 ""
+            minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
+                "--MINIMUM_BASE_QUALITY ${params.collect_hs_metrics_min_base_quality}" : ""
+            minimum_mapping_quality = params.collect_hs_metrics_min_mapping_quality ?
+                "--MINIMUM_MAPPING_QUALITY ${params.collect_hs_metrics_min_mapping_quality}" : ""
             """
             mkdir tmp
 
@@ -179,7 +186,7 @@ if (! params.skip_metrics) {
             --OUTPUT ${bam.baseName} \
             --TARGET_INTERVALS ${params.intervals} \
             --BAIT_INTERVALS ${params.intervals} \
-            ${hs_metrics_target_coverage} ${hs_metrics_per_base_coverage}
+            ${hs_metrics_target_coverage} ${hs_metrics_per_base_coverage} ${minimum_base_quality} ${minimum_mapping_quality}
             """
         }
     }
