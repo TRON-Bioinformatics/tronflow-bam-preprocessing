@@ -168,7 +168,7 @@ if (!params.skip_deduplication) {
 	    	file("${bam.baseName}.dedup_metrics") optional true into deduplication_metrics
 
         script:
-        dedup_metrics = params.skip_metrics ? "--metrics-file ${bam.baseName}.dedup_metrics" : ""
+        dedup_metrics = params.skip_metrics ? "": "--metrics-file ${bam.baseName}.dedup_metrics"
 	    """
 	    mkdir tmp
 

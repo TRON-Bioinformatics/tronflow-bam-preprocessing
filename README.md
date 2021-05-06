@@ -1,5 +1,7 @@
 # TRONflow BAM preprocessing pipeline
 
+[![DOI](https://zenodo.org/badge/358400957.svg)](https://zenodo.org/badge/latestdoi/358400957)
+
 Nextflow pipeline for the preprocessing of BAM files based on Picard and GATK.
 
 
@@ -32,7 +34,9 @@ Steps:
 
 ## References
 
-The bam preprocessing workflow use some required references (`--reference`, `--dbsnp`, `--known_indels1` and `--known_indels2`).
+The bam preprocessing workflow requires the human reference genome (`--reference`)
+Base Quality Score Recalibration (BQSR) requires dbSNP to avoid extracting error metrics from polymorphic sites (`--dbsnp`)
+Realignment around indels requires a set of known indels (`--known_indels1` and `--known_indels2`).
 These resources can be fetched from the GATK bundle https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle.
 
 Optionally, in order to run Picard's CollectHsMetrics an intervals file will need to be provided (`--intervals`). 
@@ -41,7 +45,7 @@ This can be built from a BED file using Picard's BedToIntervalList (https://gatk
 ## How to run it
 
 ```
-$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.1.0 --help
+$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.2.0 --help
 N E X T F L O W  ~  version 19.07.0
 Launching `main.nf` [intergalactic_shannon] - revision: e707c77d7b
 Usage:
@@ -55,13 +59,13 @@ Input:
     name1       tumor   tumor.1.bam
     name1       normal  normal.1.bam
     name2       tumor   tumor.2.bam
+    * --reference: path to the FASTA genome reference (indexes expected *.fai, *.dict)
  
 Optional input:
-    * --reference: path to the FASTA genome reference (indexes expected *.fai, *.dict)
-    * --dbsnp: path to the dbSNP VCF
-    * --known_indels1: path to a VCF of known indels
-    * --known_indels2: path to a second VCF of known indels
-    **NOTE**: if any of the above parameters is not provided, default hg19 resources under 
+    * --dbsnp: path to the dbSNP VCF (required to perform BQSR)
+    * --known_indels1: path to a VCF of known indels (required to perform realignment around indels)
+    * --known_indels2: path to a second VCF of known indels (required to perform realignment around indels)
+    **NOTE**: if any of the reference parameters is not provided, default hg19 resources under 
     /projects/data/gatk_bundle/hg19/ will be used
     
     * --intervals: path to an intervals file to collect HS metrics from, this can be built with Picard's BedToIntervalList (default: None)
