@@ -41,11 +41,13 @@ if (params.help) {
 }
 
 if (!params.reference) {
-    exit -1, "--reference is required"
+    log.error "--reference is required"
+    exit 1
 }
 
 if (!params.skip_bqsr && !params.dbsnp) {
-    exit -1, "--dbsnp is required to perform BQSR"
+    log.error "--dbsnp is required to perform BQSR"
+    exit 1
 }
 
 if (params.output) {

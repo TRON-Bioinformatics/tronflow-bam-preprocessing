@@ -45,7 +45,7 @@ This can be built from a BED file using Picard's BedToIntervalList (https://gatk
 ## How to run it
 
 ```
-$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.2.0 --help
+$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.2.1 --help
 N E X T F L O W  ~  version 19.07.0
 Launching `main.nf` [intergalactic_shannon] - revision: e707c77d7b
 
