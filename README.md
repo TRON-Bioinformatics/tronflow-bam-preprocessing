@@ -1,5 +1,7 @@
 # TRONflow BAM preprocessing pipeline
 
+[![DOI](https://zenodo.org/badge/358400957.svg)](https://zenodo.org/badge/latestdoi/358400957)
+
 Nextflow pipeline for the preprocessing of BAM files based on Picard and GATK.
 
 
@@ -32,7 +34,9 @@ Steps:
 
 ## References
 
-The bam preprocessing workflow use some required references (`--reference`, `--dbsnp`, `--known_indels1` and `--known_indels2`).
+The bam preprocessing workflow requires the human reference genome (`--reference`)
+Base Quality Score Recalibration (BQSR) requires dbSNP to avoid extracting error metrics from polymorphic sites (`--dbsnp`)
+Realignment around indels requires a set of known indels (`--known_indels1` and `--known_indels2`).
 These resources can be fetched from the GATK bundle https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle.
 
 Optionally, in order to run Picard's CollectHsMetrics an intervals file will need to be provided (`--intervals`). 
@@ -41,12 +45,13 @@ This can be built from a BED file using Picard's BedToIntervalList (https://gatk
 ## How to run it
 
 ```
-$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.1.0 --help
+$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.2.0 --help
 N E X T F L O W  ~  version 19.07.0
 Launching `main.nf` [intergalactic_shannon] - revision: e707c77d7b
+
 Usage:
     main.nf --input_files input_files
- 
+
 Input:
     * --input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file
     Sample type will be added to the BAM header @SN sample name
@@ -55,25 +60,24 @@ Input:
     name1       tumor   tumor.1.bam
     name1       normal  normal.1.bam
     name2       tumor   tumor.2.bam
- 
-Optional input:
     * --reference: path to the FASTA genome reference (indexes expected *.fai, *.dict)
-    * --dbsnp: path to the dbSNP VCF
-    * --known_indels1: path to a VCF of known indels
-    * --known_indels2: path to a second VCF of known indels
-    **NOTE**: if any of the above parameters is not provided, default hg19 resources under 
-    /projects/data/gatk_bundle/hg19/ will be used
-    
+
+Optional input:
+    * --dbsnp: path to the dbSNP VCF (required to perform BQSR)
+    * --known_indels1: path to a VCF of known indels (optional to perform realignment around indels)
+    * --known_indels2: path to a second VCF of known indels (optional to perform realignment around indels)
     * --intervals: path to an intervals file to collect HS metrics from, this can be built with Picard's BedToIntervalList (default: None)
     * --hs_metrics_target_coverage: name of output file for target HS metrics (default: None)
     * --hs_metrics_per_base_coverage: name of output file for per base HS metrics (default: None)
+    * --collect_hs_minimum_base_quality: minimum base quality for a base to contribute coverage (default: 20).
+    * --collect_hs_minimum_mapping_quality: minimum mapping quality for a read to contribute coverage (default: 20).
     * --skip_bqsr: optionally skip BQSR (default: false)
     * --skip_realignment: optionally skip realignment (default: false)
     * --skip_deduplication: optionally skip deduplication (default: false)
     * --skip_metrics: optionally skip metrics (default: false)
     * --output: the folder where to publish output (default: ./output)
     * --platform: the platform to be added to the BAM header. Valid values: [ILLUMINA, SOLID, LS454, HELICOS and PACBIO] (default: ILLUMINA)
-    
+
 Computational resources:
     * --prepare_bam_cpus: (default: 3)
     * --prepare_bam_memory: (default: 8g)
@@ -83,11 +87,11 @@ Computational resources:
     * --realignment_around_indels_memory: (default: 32g)
     * --bqsr_cpus: (default: 3)
     * --bqsr_memory: (default: 4g)
- 
+
  Output:
     * Preprocessed and indexed BAMs
     * Tab-separated values file with the absolute paths to the preprocessed BAMs, preprocessed_bams.txt
- 
+
 Optional output:
     * Recalibration report
     * Realignment intervals

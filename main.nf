@@ -3,10 +3,10 @@
 publish_dir = 'output'
 params.help= false
 params.input_files = false
-params.reference = "/projects/data/gatk_bundle/hg19/ucsc.hg19.fasta"
-params.dbsnp = "/projects/data/gatk_bundle/hg19/dbsnp_138.hg19.vcf"
-params.known_indels1 = "/projects/data/gatk_bundle/hg19/1000G_phase1.indels.hg19.sites.vcf"
-params.known_indels2 = "/projects/data/gatk_bundle/hg19/Mills_and_1000G_gold_standard.indels.hg19.sites.sorted.vcf"
+params.reference = false
+params.dbsnp = false
+params.known_indels1 = false
+params.known_indels2 = false
 params.intervals = false
 params.hs_metrics_target_coverage = false
 params.hs_metrics_per_base_coverage = false
@@ -16,7 +16,10 @@ params.skip_deduplication = false
 params.skip_metrics = false
 params.output = false
 params.platform = "ILLUMINA"
+params.collect_hs_metrics_min_base_quality = false
+params.collect_hs_metrics_min_mapping_quality = false
 
+// computational resources
 params.prepare_bam_cpus = 3
 params.prepare_bam_memory = "8g"
 params.mark_duplicates_cpus = 16
@@ -29,61 +32,20 @@ params.bqsr_memory = "4g"
 
 
 def helpMessage() {
-    log.info"""
-Usage:
-    main.nf --input_files input_files
-
-Input:
-    * --input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file
-    Sample type will be added to the BAM header @SN sample name
-    The input file does not have header!
-    Example input file:
-    name1       tumor   tumor.1.bam
-    name1       normal  normal.1.bam
-    name2       tumor   tumor.2.bam
-
-Optional input:
-    * --reference: path to the FASTA genome reference (indexes expected *.fai, *.dict)
-    * --dbsnp: path to the dbSNP VCF
-    * --known_indels1: path to a VCF of known indels
-    * --known_indels2: path to a second VCF of known indels
-    **NOTE**: if any of the above parameters is not provided, default hg19 resources under
-    /projects/data/gatk_bundle/hg19/ will be used
-
-    * --intervals: path to an intervals file to collect HS metrics from, this can be built with Picard's BedToIntervalList (default: None)
-    * --hs_metrics_target_coverage: name of output file for target HS metrics (default: None)
-    * --hs_metrics_per_base_coverage: name of output file for per base HS metrics (default: None)
-    * --skip_bqsr: optionally skip BQSR (default: false)
-    * --skip_realignment: optionally skip realignment (default: false)
-    * --skip_deduplication: optionally skip deduplication (default: false)
-    * --skip_metrics: optionally skip metrics (default: false)
-    * --output: the folder where to publish output (default: ./output)
-    * --platform: the platform to be added to the BAM header. Valid values: [ILLUMINA, SOLID, LS454, HELICOS and PACBIO] (default: ILLUMINA)
-
-Computational resources:
-    * --prepare_bam_cpus: (default: 3)
-    * --prepare_bam_memory: (default: 8g)
-    * --mark_duplicates_cpus: (default: 16)
-    * --mark_duplicates_memory: (default: 64g)
-    * --realignment_around_indels_cpus: (default: 2)
-    * --realignment_around_indels_memory: (default: 32g)
-    * --bqsr_cpus: (default: 3)
-    * --bqsr_memory: (default: 4g)
-
- Output:
-    * Preprocessed and indexed BAMs
-    * Tab-separated values file with the absolute paths to the preprocessed BAMs, preprocessed_bams.txt
-
-Optional output:
-    * Recalibration report
-    * Realignment intervals
-    * Metrics
-    """
+    log.info params.help_message
 }
 
 if (params.help) {
     helpMessage()
     exit 0
+}
+
+if (!params.reference) {
+    exit -1, "--reference is required"
+}
+
+if (!params.skip_bqsr && !params.dbsnp) {
+    exit -1, "--dbsnp is required to perform BQSR"
 }
 
 if (params.output) {
@@ -168,7 +130,7 @@ if (!params.skip_deduplication) {
 	    	file("${bam.baseName}.dedup_metrics") optional true into deduplication_metrics
 
         script:
-        dedup_metrics = params.skip_metrics ? "--metrics-file ${bam.baseName}.dedup_metrics" : ""
+        dedup_metrics = params.skip_metrics ? "": "--metrics-file ${bam.baseName}.dedup_metrics"
 	    """
 	    mkdir tmp
 
@@ -211,6 +173,10 @@ if (! params.skip_metrics) {
             hs_metrics_per_base_coverage= params.hs_metrics_per_base_coverage ?
                 "--PER_BASE_COVERAGE ${params.hs_metrics_per_base_coverage}" :
                 ""
+            minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
+                "--MINIMUM_BASE_QUALITY ${params.collect_hs_metrics_min_base_quality}" : ""
+            minimum_mapping_quality = params.collect_hs_metrics_min_mapping_quality ?
+                "--MINIMUM_MAPPING_QUALITY ${params.collect_hs_metrics_min_mapping_quality}" : ""
             """
             mkdir tmp
 
@@ -220,7 +186,7 @@ if (! params.skip_metrics) {
             --OUTPUT ${bam.baseName} \
             --TARGET_INTERVALS ${params.intervals} \
             --BAIT_INTERVALS ${params.intervals} \
-            ${hs_metrics_target_coverage} ${hs_metrics_per_base_coverage}
+            ${hs_metrics_target_coverage} ${hs_metrics_per_base_coverage} ${minimum_base_quality} ${minimum_mapping_quality}
             """
         }
     }
@@ -272,6 +238,11 @@ if (!params.skip_realignment) {
 	    	set val(name), val(bam_name), val(type), file("${bam.baseName}.realigned.bam"), file("${bam.baseName}.realigned.bai") into realigned_bams
 	    	file("${bam.baseName}.RA.intervals") into realignment_intervals
 
+        script:
+        known_indels = "" + params.known_indels1 ? " --known ${params.known_indels1}" : "" +
+            params.known_indels2 ? " --known ${params.known_indels2}" : ""
+        known_alleles = "" + params.known_indels1 ? " --knownAlleles ${params.known_indels1}" : "" +
+            params.known_indels2 ? " --knownAlleles ${params.known_indels2}" : ""
 	    """
 	    mkdir tmp
 
@@ -279,19 +250,17 @@ if (!params.skip_realignment) {
 	    --input_file ${bam} \
 	    --out ${bam.baseName}.RA.intervals \
 	    --reference_sequence ${params.reference} \
-	    --known ${params.known_indels1} \
-	    --known ${params.known_indels2}
+	    ${known_indels}
 
 	    gatk3 -Xmx${params.realignment_around_indels_memory} -Djava.io.tmpdir=tmp -T IndelRealigner \
 	    --input_file ${bam} \
 	    --out ${bam.baseName}.realigned.bam \
 	    --reference_sequence ${params.reference} \
 	    --targetIntervals ${bam.baseName}.RA.intervals \
-	    --knownAlleles ${params.known_indels1} \
-	    --knownAlleles ${params.known_indels2} \
 	    --consensusDeterminationModel USE_SW \
 	    --LODThresholdForCleaning 0.4 \
-	    --maxReadsInMemory 600000
+	    --maxReadsInMemory 600000 \
+	    ${known_alleles}
 	    """
 	}
 }
