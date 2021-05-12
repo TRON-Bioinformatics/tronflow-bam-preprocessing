@@ -82,7 +82,7 @@ process prepareBam {
       set val(name),
         val("${bam.baseName}"),
         val(type), file("${bam.baseName}.prepared.bam"),
-        file("${bam.baseName}.prepared.bai")  into prepared_bams, prepared_bams_for_metrics, prepared_bams_for_hs_metrics
+        file("${bam.baseName}.prepared.bai")  into prepared_bams
 
     """
     mkdir tmp
@@ -128,7 +128,8 @@ if (!params.skip_deduplication) {
 
 	    output:
 	    	set val(name), val(bam_name), val(type),
-	    	    file("${bam.baseName}.dedup.bam"), file("${bam.baseName}.dedup.bam.bai") into deduplicated_bams
+	    	    file("${bam.baseName}.dedup.bam"), file("${bam.baseName}.dedup.bam.bai") into deduplicated_bams,
+	    	    deduplicated_bams_for_metrics, deduplicated_bams_for_hs_metrics
 	    	file("${bam.baseName}.dedup_metrics") optional true into deduplication_metrics
 
         script:
@@ -146,7 +147,7 @@ if (!params.skip_deduplication) {
 	}
 }
 else {
-    deduplicated_bams = prepared_bams
+    prepared_bams.into{ deduplicated_bams; deduplicated_bams_for_metrics; deduplicated_bams_for_hs_metrics}
 }
 
 if (! params.skip_metrics) {
@@ -160,7 +161,7 @@ if (! params.skip_metrics) {
             publishDir "${publish_dir}/${name}/metrics", mode: "copy"
 
             input:
-                set name, bam_name, type, file(bam), file(bai) from prepared_bams_for_hs_metrics
+                set name, bam_name, type, file(bam), file(bai) from deduplicated_bams_for_hs_metrics
 
             output:
                 file("*_metrics") optional true into txt_hs_metrics
@@ -200,7 +201,7 @@ if (! params.skip_metrics) {
 	    publishDir "${publish_dir}/${name}/metrics", mode: "copy"
 
 	    input:
-	    	set name, bam_name, type, file(bam), file(bai) from prepared_bams_for_metrics
+	    	set name, bam_name, type, file(bam), file(bai) from deduplicated_bams_for_metrics
 
 	    output:
 	        file("*_metrics") optional true into txt_metrics
