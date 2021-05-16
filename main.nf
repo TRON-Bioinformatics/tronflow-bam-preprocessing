@@ -28,6 +28,8 @@ params.realignment_around_indels_cpus = 2
 params.realignment_around_indels_memory = "32g"
 params.bqsr_cpus = 3
 params.bqsr_memory = "4g"
+params.metrics_cpus = 1
+params.metrics_memory = "8g"
 
 
 
@@ -155,8 +157,8 @@ if (! params.skip_metrics) {
     if (params.intervals) {
 
         process hsMetrics {
-            cpus 1
-            memory "2g"
+            cpus "${params.metrics_cpus}"
+            memory "${params.metrics_memory}"
             tag "${name}"
             publishDir "${publish_dir}/${name}/metrics", mode: "copy"
 
@@ -184,7 +186,7 @@ if (! params.skip_metrics) {
             mkdir tmp
 
             gatk CollectHsMetrics \
-            --java-options '-Xmx2g  -Djava.io.tmpdir=tmp' \
+            --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=tmp' \
             --INPUT  ${bam} \
             --OUTPUT ${bam.baseName} \
             --TARGET_INTERVALS ${params.intervals} \
@@ -195,8 +197,8 @@ if (! params.skip_metrics) {
     }
 
     process metrics {
-	    cpus 1
-        memory "2g"
+	    cpus "${params.metrics_cpus}"
+        memory "${params.metrics_memory}"
 	    tag "${name}"
 	    publishDir "${publish_dir}/${name}/metrics", mode: "copy"
 
@@ -211,7 +213,7 @@ if (! params.skip_metrics) {
 	    mkdir tmp
 
 	    gatk CollectMultipleMetrics \
-        --java-options '-Xmx2g  -Djava.io.tmpdir=tmp' \
+        --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=tmp' \
         --INPUT  ${bam} \
         --OUTPUT ${bam.baseName} \
         --REFERENCE_SEQUENCE ${params.reference} \

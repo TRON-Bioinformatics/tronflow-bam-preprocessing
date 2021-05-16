@@ -45,7 +45,7 @@ This can be built from a BED file using Picard's BedToIntervalList (https://gatk
 ## How to run it
 
 ```
-$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.2.1 --help
+$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.3.1 --help
 N E X T F L O W  ~  version 19.07.0
 Launching `main.nf` [intergalactic_shannon] - revision: e707c77d7b
 
@@ -87,6 +87,8 @@ Computational resources:
     * --realignment_around_indels_memory: (default: 32g)
     * --bqsr_cpus: (default: 3)
     * --bqsr_memory: (default: 4g)
+    * --metrics_cpus: (default: 1)
+    * --metrics_memory: (default: 8g)
 
  Output:
     * Preprocessed and indexed BAMs
