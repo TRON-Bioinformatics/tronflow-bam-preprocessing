@@ -16,7 +16,7 @@ GATK has been providing a well known best practices document on BAM preprocessin
 
 We aim at providing a single implementation of the BAM preprocessing pipeline that can be used across different situations. For this purpose there are some required steps and some optional steps. This is implemented as a Nextflow pipeline to simplify parallelization of execution in the cluster. The default configuration uses reference genome hg19, if another reference is needed the adequate resources must be provided. The reference genome resources  for hg19 were downloaded from https://software.broadinstitute.org/gatk/download/bundle
 
-The input is a tab-separated values file where each line corresponds to one input BAM. The output is another tab-separated values file with the absolute paths of the preprocessed and indexed BAMs.
+The input is a tab-separated values file where each line corresponds to one input BAM. The output is another tab-separated values file with the absolute paths of the preprocessed and indexed BAMs. 
 
 ## Implementation
 
