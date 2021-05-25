@@ -83,9 +83,10 @@ process prepareBam {
     output:
       set val(name),
         val("${bam.baseName}"),
-        val(type), file("${bam.baseName}.prepared.bam"),
-        file("${bam.baseName}.prepared.bai")  into prepared_bams
+        val(type), file("${bam.baseName}.prepared.bam") into prepared_bams
 
+    script:
+    order = params.skip_deduplication ? "--SORT_ORDER coordinate": "--SORT_ORDER queryname"
     """
     mkdir tmp
 
@@ -109,8 +110,7 @@ process prepareBam {
     --RGSM ${type} \
     --RGLB 1 \
     --RGPL ${params.platform} \
-    --SORT_ORDER coordinate \
-    --CREATE_INDEX true
+    ${order}
     """
 }
 
@@ -126,7 +126,7 @@ if (!params.skip_deduplication) {
 	    publishDir "${publish_dir}/${name}/metrics", mode: "copy", pattern: "*.dedup_metrics"
 
 	    input:
-	    	set name, bam_name, type, file(bam), file(bai) from prepared_bams
+	    	set name, bam_name, type, file(bam) from prepared_bams
 
 	    output:
 	    	set val(name), val(bam_name), val(type),
@@ -149,7 +149,28 @@ if (!params.skip_deduplication) {
 	}
 }
 else {
-    prepared_bams.into{ deduplicated_bams; deduplicated_bams_for_metrics; deduplicated_bams_for_hs_metrics}
+    process indexBam {
+	    cpus "1"
+        memory "8g"
+	    tag "${name}"
+
+	    input:
+	    	set name, bam_name, type, file(bam) from prepared_bams
+
+	    output:
+	    	set val(name), val(bam_name), val(type),
+	    	    file("${bam}"), file("${bam.baseName}.bai") into deduplicated_bams,
+	    	    deduplicated_bams_for_metrics, deduplicated_bams_for_hs_metrics
+
+        script:
+	    """
+	    mkdir tmp
+
+        gatk BuildBamIndex \
+        --java-options '-Xmx8g  -Djava.io.tmpdir=tmp' \
+        --INPUT  ${bam}
+	    """
+	}
 }
 
 if (! params.skip_metrics) {
