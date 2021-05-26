@@ -31,6 +31,8 @@ params.bqsr_cpus = 3
 params.bqsr_memory = "4g"
 params.metrics_cpus = 1
 params.metrics_memory = "8g"
+params.index_cpus = 1
+params.index_memory = "8g"
 
 
 
@@ -153,8 +155,8 @@ if (!params.skip_deduplication) {
 }
 else {
     process indexBam {
-	    cpus "1"
-        memory "8g"
+	    cpus "${params.index_cpus}"
+        memory "${params.index_memory}"
 	    tag "${name}"
 
 	    input:
