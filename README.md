@@ -74,6 +74,7 @@ Optional input:
     * --skip_bqsr: optionally skip BQSR (default: false)
     * --skip_realignment: optionally skip realignment (default: false)
     * --skip_deduplication: optionally skip deduplication (default: false)
+    * --remove_duplicates: removes duplicate reads from output BAM instead of flagging them (default: true)
     * --skip_metrics: optionally skip metrics (default: false)
     * --output: the folder where to publish output (default: ./output)
     * --platform: the platform to be added to the BAM header. Valid values: [ILLUMINA, SOLID, LS454, HELICOS and PACBIO] (default: ILLUMINA)
