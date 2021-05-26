@@ -13,6 +13,7 @@ params.hs_metrics_per_base_coverage = false
 params.skip_bqsr = false
 params.skip_realignment = false
 params.skip_deduplication = false
+params.remove_duplicates = true
 params.skip_metrics = false
 params.output = false
 params.platform = "ILLUMINA"
@@ -136,6 +137,7 @@ if (!params.skip_deduplication) {
 
         script:
         dedup_metrics = params.skip_metrics ? "": "--metrics-file ${bam.baseName}.dedup_metrics"
+        remove_duplicates = params.remove_duplicates ? "--remove-all-duplicates true" : "--remove-all-duplicates false"
 	    """
 	    mkdir tmp
 
@@ -144,6 +146,7 @@ if (!params.skip_deduplication) {
         --input  ${bam} \
         --output ${bam.baseName}.dedup.bam \
         --conf 'spark.executor.cores=${task.cpus}' \
+        ${remove_duplicates} \
         ${dedup_metrics}
 	    """
 	}
