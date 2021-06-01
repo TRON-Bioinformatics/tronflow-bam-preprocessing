@@ -1,8 +1,8 @@
-# TRONflow BAM preprocessing pipeline
+# TronFlow BAM preprocessing pipeline
 
 [![DOI](https://zenodo.org/badge/358400957.svg)](https://zenodo.org/badge/latestdoi/358400957)
 
-Nextflow pipeline for the preprocessing of BAM files based on Picard and GATK.
+Nextflow (Di Tommaso, 2017) pipeline for the preprocessing of BAM files based on Picard and GATK (DePristo, 2011).
 
 
 ## Background
@@ -30,7 +30,7 @@ Steps:
 * **Base Quality Score Recalibration (BQSR)** (optional). It aims at correcting systematic errors in the sequencer when assigning the base call quality errors, as these scores are used by variant callers it improves variant calling in some situations. Implemented in GATK4
 * **Metrics** (optional). A number of metrics are obtained over the BAM file with Picard's CollectMetrics (eg: duplication, insert size, alignment, etc.).
 
-![Pipeline](bam_preprocessing2.png)
+![Pipeline](figures/bam_preprocessing2.png)
 
 ## References
 
@@ -45,7 +45,8 @@ This can be built from a BED file using Picard's BedToIntervalList (https://gatk
 ## How to run it
 
 ```
-$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing -r v1.3.1 --help
+$ nextflow run tron-bioinformatics/tronflow-bam-preprocessing --help
+
 N E X T F L O W  ~  version 19.07.0
 Launching `main.nf` [intergalactic_shannon] - revision: e707c77d7b
 
@@ -100,3 +101,9 @@ Optional output:
     * Realignment intervals
     * Metrics
 ```
+
+
+## References
+
+* DePristo M, Banks E, Poplin R, Garimella K, Maguire J, Hartl C, Philippakis A, del Angel G, Rivas MA, Hanna M, McKenna A, Fennell T, Kernytsky A, Sivachenko A, Cibulskis K, Gabriel S, Altshuler D, Daly M. (2011). A framework for variation discovery and genotyping using next-generation DNA sequencing data. Nat Genet, 43:491-498. DOI: 10.1038/ng.806.
+* Di Tommaso, P., Chatzou, M., Floden, E. W., Barja, P. P., Palumbo, E., & Notredame, C. (2017). Nextflow enables reproducible computational workflows. Nature Biotechnology, 35(4), 316–319. 10.1038/nbt.3820
