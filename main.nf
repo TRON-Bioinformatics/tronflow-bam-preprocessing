@@ -3,6 +3,8 @@
 publish_dir = 'output'
 params.help= false
 params.input_files = false
+params.input_name = "normal"
+params.input_bam = false
 params.reference = false
 params.dbsnp = false
 params.known_indels1 = false
@@ -59,15 +61,23 @@ if (params.output) {
   publish_dir = params.output
 }
 
-// checks required inputs
-if (params.input_files) {
+if (! params.input_files && ! params.input_bam) {
+  exit 1, "Neither --input_files or --input_bam are provided!"
+}
+else if (params.input_files && params.input_bam) {
+  exit 1, "Both --input_files and --input_bam are provided! Please, provide only one."
+}
+else if (params.input_files) {
   Channel
     .fromPath(params.input_files)
     .splitCsv(header: ['name', 'type', 'bam'], sep: "\t")
     .map{ row-> tuple(row.name, row.type, file(row.bam)) }
     .set { input_files }
-} else {
-  exit 1, "Input file not specified!"
+} else if (params.input_bam && params.input_name) {
+  input_bam = file(params.input_bam)
+  Channel
+    .fromList([tuple(input_bam.name.take(input_bam.name.lastIndexOf('.')), params.input_name, input_bam)])
+    .set { input_files }
 }
 
 /*

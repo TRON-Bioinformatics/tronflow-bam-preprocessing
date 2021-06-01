@@ -54,7 +54,8 @@ Usage:
     main.nf --input_files input_files
 
 Input:
-    * --input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file
+    * --input_bam: the path to a single BAM (this option is not compatible with --input_files)
+    * --input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file (this option is not compatible with --input_bam)
     Sample type will be added to the BAM header @SN sample name
     The input file does not have header!
     Example input file:
@@ -64,6 +65,7 @@ Input:
     * --reference: path to the FASTA genome reference (indexes expected *.fai, *.dict)
 
 Optional input:
+    * --input_name: the name of the sample. Only used when --input_bam is provided (default: normal)
     * --dbsnp: path to the dbSNP VCF (required to perform BQSR)
     * --known_indels1: path to a VCF of known indels (optional to perform realignment around indels)
     * --known_indels2: path to a second VCF of known indels (optional to perform realignment around indels)
@@ -86,7 +88,7 @@ Computational resources:
     * --mark_duplicates_cpus: (default: 16)
     * --mark_duplicates_memory: (default: 64g)
     * --realignment_around_indels_cpus: (default: 2)
-    * --realignment_around_indels_memory: (default: 32g)
+    * --realignment_around_indels_memory: (default: 31g)
     * --bqsr_cpus: (default: 3)
     * --bqsr_memory: (default: 4g)
     * --metrics_cpus: (default: 1)
