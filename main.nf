@@ -26,7 +26,7 @@ params.prepare_bam_memory = "8g"
 params.mark_duplicates_cpus = 16
 params.mark_duplicates_memory = "64g"
 params.realignment_around_indels_cpus = 2
-params.realignment_around_indels_memory = "32g"
+params.realignment_around_indels_memory = "31g"
 params.bqsr_cpus = 3
 params.bqsr_memory = "4g"
 params.metrics_cpus = 1
@@ -270,18 +270,17 @@ if (!params.skip_realignment) {
 	    	file("${bam.baseName}.RA.intervals") into realignment_intervals
 
         script:
-        known_indels = "" + params.known_indels1 ? " --known ${params.known_indels1}" : "" +
-            params.known_indels2 ? " --known ${params.known_indels2}" : ""
-        known_alleles = "" + params.known_indels1 ? " --knownAlleles ${params.known_indels1}" : "" +
-            params.known_indels2 ? " --knownAlleles ${params.known_indels2}" : ""
+        known_indels1 = params.known_indels1 ? " --known ${params.known_indels1}" : ""
+        known_indels2 = params.known_indels2 ? " --known ${params.known_indels2}" : ""
+        known_alleles1 = params.known_indels1 ? " --knownAlleles ${params.known_indels1}" : ""
+        known_alleles2 = params.known_indels2 ? " --knownAlleles ${params.known_indels2}" : ""
 	    """
 	    mkdir tmp
 
 	    gatk3 -Xmx${params.realignment_around_indels_memory} -Djava.io.tmpdir=tmp -T RealignerTargetCreator \
 	    --input_file ${bam} \
 	    --out ${bam.baseName}.RA.intervals \
-	    --reference_sequence ${params.reference} \
-	    ${known_indels}
+	    --reference_sequence ${params.reference} ${known_indels1} ${known_indels2}
 
 	    gatk3 -Xmx${params.realignment_around_indels_memory} -Djava.io.tmpdir=tmp -T IndelRealigner \
 	    --input_file ${bam} \
@@ -290,8 +289,7 @@ if (!params.skip_realignment) {
 	    --targetIntervals ${bam.baseName}.RA.intervals \
 	    --consensusDeterminationModel USE_SW \
 	    --LODThresholdForCleaning 0.4 \
-	    --maxReadsInMemory 600000 \
-	    ${known_alleles}
+	    --maxReadsInMemory 600000 ${known_alleles1} ${known_alleles2}
 	    """
 	}
 }

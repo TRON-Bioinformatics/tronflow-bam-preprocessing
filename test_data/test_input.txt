@@ -1,2 +1,2 @@
-TESTX_S1_L001	tumor	test_data/TESTX_S1_L001.bam
-TESTX_S1_L002	normal	test_data/TESTX_S1_L002.bam
+sample1	tumor	test_data/TESTX_S1_L001.bam
+sample2	normal	test_data/TESTX_S1_L002.bam
