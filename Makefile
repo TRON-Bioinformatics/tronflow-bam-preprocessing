@@ -13,8 +13,8 @@ test:
 	nextflow main.nf -profile test,conda --skip_deduplication --output output/test4
 	nextflow main.nf -profile test,conda --output output/test5 --skip_deduplication --skip_bqsr --skip_metrics --known_indels1 false --known_indels2 false
 	nextflow main.nf -profile test,conda --output output/test6 --intervals false --skip_deduplication --skip_bqsr --skip_realignment
-	nextflow main.nf -profile test,conda --output output/test7 --hs_metrics_target_coverage target_coverage.txt --hs_metrics_per_base_coverage per_base_coverage.txt --skip_bqsr --skip_realignment
-	nextflow main.nf -profile test,conda --output output/test8 --hs_metrics_target_coverage target_coverage.txt --hs_metrics_per_base_coverage per_base_coverage.txt --collect_hs_metrics_min_base_quality 10 --collect_hs_metrics_min_mapping_quality 10 --remove_duplicates false --skip_bqsr --skip_realignment
+	nextflow main.nf -profile test,conda --output output/test7 --skip_bqsr --skip_realignment
+	nextflow main.nf -profile test,conda --output output/test8  --collect_hs_metrics_min_base_quality 10 --collect_hs_metrics_min_mapping_quality 10 --remove_duplicates false --skip_bqsr --skip_realignment
 	nextflow main.nf -profile test,conda --output output/test9 --skip_deduplication --skip_bqsr --skip_realignment  --input_files false --input_bam test_data/TESTX_S1_L001.bam
 
 check:
@@ -48,6 +48,8 @@ check:
 	test -s output/test7/sample2/TESTX_S1_L002.preprocessed.bai || { echo "Missing test 7 output file!"; exit 1; }
 	test -s output/test8/sample1/TESTX_S1_L001.preprocessed.bam || { echo "Missing test 8 output file!"; exit 1; }
 	test -s output/test8/sample1/TESTX_S1_L001.preprocessed.bai || { echo "Missing test 8 output file!"; exit 1; }
+	test -s output/test8/sample1/metrics/TESTX_S1_L001.prepared.dedup.hs_metrics.txt || { echo "Missing test 8 output file!"; exit 1; }
+	test -s output/test8/sample1/metrics/TESTX_S1_L001.prepared.dedup_metrics.txt || { echo "Missing test 8 output file!"; exit 1; }
 	test -s output/test8/sample2/TESTX_S1_L002.preprocessed.bam || { echo "Missing test 8 output file!"; exit 1; }
 	test -s output/test8/sample2/TESTX_S1_L002.preprocessed.bai || { echo "Missing test 8 output file!"; exit 1; }
 	test -s output/test9/TESTX_S1_L001/TESTX_S1_L001.preprocessed.bam || { echo "Missing test 9 output file!"; exit 1; }
