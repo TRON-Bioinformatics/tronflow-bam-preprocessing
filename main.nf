@@ -134,7 +134,7 @@ if (!params.skip_deduplication) {
 	    cpus "${params.mark_duplicates_cpus}"
         memory "${params.mark_duplicates_memory}"
 	    tag "${name}"
-	    publishDir "${publish_dir}/${name}/metrics", mode: "copy", pattern: "*.dedup_metrics"
+	    publishDir "${publish_dir}/${name}/metrics", mode: "copy", pattern: "*.dedup_metrics.txt"
 
 	    input:
 	    	set name, bam_name, type, file(bam) from prepared_bams
@@ -143,7 +143,7 @@ if (!params.skip_deduplication) {
 	    	set val(name), val(bam_name), val(type),
 	    	    file("${bam.baseName}.dedup.bam"), file("${bam.baseName}.dedup.bam.bai") into deduplicated_bams,
 	    	    deduplicated_bams_for_metrics, deduplicated_bams_for_hs_metrics
-	    	file("${bam.baseName}.dedup_metrics") optional true into deduplication_metrics
+	    	file("${bam.baseName}.dedup_metrics.txt") optional true
 
         script:
         dedup_metrics = params.skip_metrics ? "": "--metrics-file ${bam.baseName}.dedup_metrics.txt"
@@ -155,9 +155,7 @@ if (!params.skip_deduplication) {
         --java-options '-Xmx${params.mark_duplicates_memory}  -Djava.io.tmpdir=tmp' \
         --input  ${bam} \
         --output ${bam.baseName}.dedup.bam \
-        --conf 'spark.executor.cores=${task.cpus}' \
-        ${remove_duplicates} \
-        ${dedup_metrics}
+        --conf 'spark.executor.cores=${task.cpus}' ${remove_duplicates} ${dedup_metrics}
 	    """
 	}
 }
