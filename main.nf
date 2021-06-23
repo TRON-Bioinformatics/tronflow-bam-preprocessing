@@ -10,8 +10,6 @@ params.dbsnp = false
 params.known_indels1 = false
 params.known_indels2 = false
 params.intervals = false
-params.hs_metrics_target_coverage = false
-params.hs_metrics_per_base_coverage = false
 params.skip_bqsr = false
 params.skip_realignment = false
 params.skip_deduplication = false
@@ -136,7 +134,7 @@ if (!params.skip_deduplication) {
 	    cpus "${params.mark_duplicates_cpus}"
         memory "${params.mark_duplicates_memory}"
 	    tag "${name}"
-	    publishDir "${publish_dir}/${name}/metrics", mode: "copy", pattern: "*.dedup_metrics"
+	    publishDir "${publish_dir}/${name}/metrics", mode: "copy", pattern: "*.dedup_metrics.txt"
 
 	    input:
 	    	set name, bam_name, type, file(bam) from prepared_bams
@@ -145,10 +143,10 @@ if (!params.skip_deduplication) {
 	    	set val(name), val(bam_name), val(type),
 	    	    file("${bam.baseName}.dedup.bam"), file("${bam.baseName}.dedup.bam.bai") into deduplicated_bams,
 	    	    deduplicated_bams_for_metrics, deduplicated_bams_for_hs_metrics
-	    	file("${bam.baseName}.dedup_metrics") optional true into deduplication_metrics
+	    	file("${bam.baseName}.dedup_metrics.txt") optional true
 
         script:
-        dedup_metrics = params.skip_metrics ? "": "--metrics-file ${bam.baseName}.dedup_metrics"
+        dedup_metrics = params.skip_metrics ? "": "--metrics-file ${bam.baseName}.dedup_metrics.txt"
         remove_duplicates = params.remove_duplicates ? "--remove-all-duplicates true" : "--remove-all-duplicates false"
 	    """
 	    mkdir tmp
@@ -157,9 +155,7 @@ if (!params.skip_deduplication) {
         --java-options '-Xmx${params.mark_duplicates_memory}  -Djava.io.tmpdir=tmp' \
         --input  ${bam} \
         --output ${bam.baseName}.dedup.bam \
-        --conf 'spark.executor.cores=${task.cpus}' \
-        ${remove_duplicates} \
-        ${dedup_metrics}
+        --conf 'spark.executor.cores=${task.cpus}' ${remove_duplicates} ${dedup_metrics}
 	    """
 	}
 }
@@ -202,18 +198,11 @@ if (! params.skip_metrics) {
                 set name, bam_name, type, file(bam), file(bai) from deduplicated_bams_for_hs_metrics
 
             output:
-                file("*_metrics") optional true into txt_hs_metrics
-                file("*.pdf") optional true into pdf_hs_metrics
-                file(params.hs_metrics_target_coverage) optional true into target_hs_metrics
-                file(params.hs_metrics_per_base_coverage) optional true into per_base_hs_metrics
+                file("*_metrics") optional true
+                file("*.pdf") optional true
+                file("${bam.baseName}.hs_metrics.txt")
 
             script:
-            hs_metrics_target_coverage= params.hs_metrics_target_coverage ?
-                "--PER_TARGET_COVERAGE ${params.hs_metrics_target_coverage} --REFERENCE_SEQUENCE ${params.reference}" :
-                ""
-            hs_metrics_per_base_coverage= params.hs_metrics_per_base_coverage ?
-                "--PER_BASE_COVERAGE ${params.hs_metrics_per_base_coverage}" :
-                ""
             minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
                 "--MINIMUM_BASE_QUALITY ${params.collect_hs_metrics_min_base_quality}" : ""
             minimum_mapping_quality = params.collect_hs_metrics_min_mapping_quality ?
@@ -224,10 +213,10 @@ if (! params.skip_metrics) {
             gatk CollectHsMetrics \
             --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=tmp' \
             --INPUT  ${bam} \
-            --OUTPUT ${bam.baseName} \
+            --OUTPUT ${bam.baseName}.hs_metrics.txt \
             --TARGET_INTERVALS ${params.intervals} \
             --BAIT_INTERVALS ${params.intervals} \
-            ${hs_metrics_target_coverage} ${hs_metrics_per_base_coverage} ${minimum_base_quality} ${minimum_mapping_quality}
+            ${minimum_base_quality} ${minimum_mapping_quality}
             """
         }
     }
