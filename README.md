@@ -1,6 +1,13 @@
+![TRON logo](https://tron-mainz.de/wp-content/uploads/2020/07/TRON_Logo_Science.svg "TRON logo")
+
+
 # TronFlow BAM preprocessing pipeline
 
 [![DOI](https://zenodo.org/badge/358400957.svg)](https://zenodo.org/badge/latestdoi/358400957)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
+[![Powered by Nextflow](https://img.shields.io/badge/powered%20by-Nextflow-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://www.nextflow.io/)
+
+
 
 Nextflow (Di Tommaso, 2017) pipeline for the preprocessing of BAM files based on Picard and GATK (DePristo, 2011).
 
