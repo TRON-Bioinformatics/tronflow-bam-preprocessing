@@ -1,5 +1,6 @@
 ![TRON logo](https://tron-mainz.de/wp-content/uploads/2020/07/TRON_Logo_Science.svg "TRON logo")
 
+--------
 
 # TronFlow BAM preprocessing pipeline
 
