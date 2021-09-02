@@ -1,9 +1,6 @@
-![TRON logo](https://tron-mainz.de/wp-content/uploads/2020/07/TRON_Logo_Science.svg "TRON logo")
-
---------
-
 # TronFlow BAM preprocessing pipeline
 
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/release/tron-bioinformatics/tronflow-bam-preprocessing?sort=semver)
 [![DOI](https://zenodo.org/badge/358400957.svg)](https://zenodo.org/badge/latestdoi/358400957)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
 [![Powered by Nextflow](https://img.shields.io/badge/powered%20by-Nextflow-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://www.nextflow.io/)
@@ -22,9 +19,9 @@ GATK has been providing a well known best practices document on BAM preprocessin
 
 ## Objectives
 
-We aim at providing a single implementation of the BAM preprocessing pipeline that can be used across different situations. For this purpose there are some required steps and some optional steps. This is implemented as a Nextflow pipeline to simplify parallelization of execution in the cluster. The default configuration uses reference genome hg19, if another reference is needed the adequate resources must be provided. The reference genome resources  for hg19 were downloaded from https://software.broadinstitute.org/gatk/download/bundle
+We aim at providing a single implementation of the BAM preprocessing pipeline that can be used across different situations. For this purpose there are some required steps and some optional steps. This is implemented as a Nextflow pipeline to simplify parallelization of execution in the cluster. 
 
-The input is a tab-separated values file where each line corresponds to one input BAM. The output is another tab-separated values file with the absolute paths of the preprocessed and indexed BAMs. 
+The input can be either a tab-separated values file (`--input_files`) where each line corresponds to one input BAM or a single BAM (`--input_bam` and `--input_name`).
 
 ## Implementation
 
