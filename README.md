@@ -6,9 +6,13 @@
 [![License](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
 [![Powered by Nextflow](https://img.shields.io/badge/powered%20by-Nextflow-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://www.nextflow.io/)
 
+The TronFlow BAM preprocessing pipeline is part of a collection of computational workflows for tumor-normal pair 
+somatic variant calling. These workflows are implemented in the Nextflow (Di Tommaso, 2017) framework.
+
+Find the documentation here [![Documentation Status](https://readthedocs.org/projects/tronflow-docs/badge/?version=latest)](https://tronflow-docs.readthedocs.io/en/latest/?badge=latest)
 
 
-Nextflow (Di Tommaso, 2017) pipeline for the preprocessing of BAM files based on Picard and GATK (DePristo, 2011).
+The aim of this workflow is the preprocessing of BAM files based on Picard and GATK (DePristo, 2011).
 
 
 ## Background
