@@ -12,6 +12,8 @@ process HS_METRICS {
     tag "${name}"
     publishDir "${params.output}/${name}/metrics", mode: "copy"
 
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
+
     input:
     tuple val(name), val(bam_name), val(type), file(bam), file(bai)
 
@@ -43,6 +45,8 @@ process METRICS {
     memory "${params.metrics_memory}"
     tag "${name}"
     publishDir "${params.output}/${name}/metrics", mode: "copy"
+
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
 
     input:
     tuple val(name), val(bam_name), val(type), file(bam), file(bai)

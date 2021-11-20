@@ -17,6 +17,8 @@ process PREPARE_BAM {
     memory "${params.prepare_bam_memory}"
     tag "${name}"
 
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
+
     input:
     tuple val(name), val(type), file(bam)
 
@@ -56,6 +58,8 @@ process INDEX_BAM {
     cpus "${params.index_cpus}"
     memory "${params.index_memory}"
     tag "${name}"
+
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
 
     input:
     tuple val(name), val(bam_name), val(type), file(bam)
