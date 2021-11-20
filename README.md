@@ -1,6 +1,7 @@
 # TronFlow BAM preprocessing pipeline
 
 ![GitHub tag (latest SemVer)](https://img.shields.io/github/v/release/tron-bioinformatics/tronflow-bam-preprocessing?sort=semver)
+[![Automated tests](https://github.com/TRON-Bioinformatics/tronflow-bam-preprocessing/actions/workflows/automated_tests.yml/badge.svg)](https://github.com/TRON-Bioinformatics/tronflow-bam-preprocessing/actions/workflows/automated_tests.yml)
 [![DOI](https://zenodo.org/badge/358400957.svg)](https://zenodo.org/badge/latestdoi/358400957)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
 [![Powered by Nextflow](https://img.shields.io/badge/powered%20by-Nextflow-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://www.nextflow.io/)
