@@ -4,7 +4,6 @@ params.collect_hs_metrics_min_base_quality = false
 params.collect_hs_metrics_min_mapping_quality = false
 params.reference = false
 params.output = 'output'
-params.intervals_bed = false
 params.intervals = false
 
 
@@ -32,12 +31,17 @@ process HS_METRICS {
     """
     mkdir tmp
 
+    gatk BedToIntervalList \
+    --INPUT ${params.intervals} \
+    --OUTPUT ${params.intervals}.intervals \
+    --SEQUENCE_DICTIONARY ${bam}
+
     gatk CollectHsMetrics \
     --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=tmp' \
     --INPUT  ${bam} \
     --OUTPUT ${name}.hs_metrics.txt \
-    --TARGET_INTERVALS ${params.intervals} \
-    --BAIT_INTERVALS ${params.intervals} \
+    --TARGET_INTERVALS ${params.intervals}.intervals \
+    --BAIT_INTERVALS ${params.intervals}.intervals \
     ${minimum_base_quality} ${minimum_mapping_quality}
     """
 }
@@ -96,7 +100,7 @@ process COVERAGE_ANALYSIS {
         "--min-BQ ${params.collect_hs_metrics_min_base_quality}" : ""
     minimum_mapping_quality = params.collect_hs_metrics_min_mapping_quality ?
         "--min-MQ ${params.collect_hs_metrics_min_mapping_quality}" : ""
-    intervals = params.intervals_bed ? "-b ${params.intervals_bed}" : ""
+    intervals = params.intervals ? "-b ${params.intervals}" : ""
     """
     samtools coverage ${minimum_base_quality} ${minimum_mapping_quality} ${bam} > ${name}.coverage.tsv
     samtools depth -s -d 0 -H ${intervals} ${bam} > ${name}.depth.tsv

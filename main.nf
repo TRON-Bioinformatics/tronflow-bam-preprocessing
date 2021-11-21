@@ -17,7 +17,6 @@ params.dbsnp = false
 params.known_indels1 = false
 params.known_indels2 = false
 params.intervals = false
-params.intervals_bed = false
 params.skip_bqsr = false
 params.skip_realignment = false
 params.skip_deduplication = false
