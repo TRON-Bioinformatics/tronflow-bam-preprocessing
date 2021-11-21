@@ -4,7 +4,7 @@ nextflow.enable.dsl = 2
 
 include { PREPARE_BAM; INDEX_BAM } from './modules/01_prepare_bam'
 include { MARK_DUPLICATES } from './modules/02_mark_duplicates'
-include { METRICS; HS_METRICS } from './modules/03_metrics'
+include { METRICS; HS_METRICS; COVERAGE_ANALYSIS } from './modules/03_metrics'
 include { REALIGNMENT_AROUND_INDELS } from './modules/04_realignment_around_indels'
 include { BQSR; CREATE_OUTPUT } from './modules/05_bqsr'
 
@@ -17,6 +17,7 @@ params.dbsnp = false
 params.known_indels1 = false
 params.known_indels2 = false
 params.intervals = false
+params.intervals_bed = false
 params.skip_bqsr = false
 params.skip_realignment = false
 params.skip_deduplication = false
@@ -100,6 +101,7 @@ workflow {
             HS_METRICS(deduplicated_bams)
         }
         METRICS(deduplicated_bams)
+        COVERAGE_ANALYSIS(deduplicated_bams)
     }
 
     if (!params.skip_realignment) {

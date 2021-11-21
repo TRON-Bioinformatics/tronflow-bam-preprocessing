@@ -4,23 +4,25 @@ params.collect_hs_metrics_min_base_quality = false
 params.collect_hs_metrics_min_mapping_quality = false
 params.reference = false
 params.output = 'output'
+params.intervals_bed = false
+params.intervals = false
 
 
 process HS_METRICS {
-    cpus "${params.metrics_cpus}"
-    memory "${params.metrics_memory}"
+    cpus params.metrics_cpus
+    memory params.metrics_memory
     tag "${name}"
-    publishDir "${params.output}/${name}/metrics", mode: "copy"
+    publishDir "${params.output}/${name}/metrics/hs_metrics", mode: "copy"
 
     conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
 
     input:
-    tuple val(name), val(bam_name), val(type), file(bam), file(bai)
+    tuple val(name), val(type), file(bam), file(bai)
 
     output:
     file("*_metrics") optional true
     file("*.pdf") optional true
-    file("${bam.baseName}.hs_metrics.txt")
+    file("${name}.hs_metrics.txt")
 
     script:
     minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
@@ -33,7 +35,7 @@ process HS_METRICS {
     gatk CollectHsMetrics \
     --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=tmp' \
     --INPUT  ${bam} \
-    --OUTPUT ${bam.baseName}.hs_metrics.txt \
+    --OUTPUT ${name}.hs_metrics.txt \
     --TARGET_INTERVALS ${params.intervals} \
     --BAIT_INTERVALS ${params.intervals} \
     ${minimum_base_quality} ${minimum_mapping_quality}
@@ -41,15 +43,15 @@ process HS_METRICS {
 }
 
 process METRICS {
-    cpus "${params.metrics_cpus}"
-    memory "${params.metrics_memory}"
+    cpus params.metrics_cpus
+    memory params.metrics_memory
     tag "${name}"
-    publishDir "${params.output}/${name}/metrics", mode: "copy"
+    publishDir "${params.output}/${name}/metrics/gatk_multiple_metrics", mode: "copy"
 
     conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
 
     input:
-    tuple val(name), val(bam_name), val(type), file(bam), file(bai)
+    tuple val(name), val(type), file(bam), file(bai)
 
     output:
     file("*_metrics") optional true
@@ -61,7 +63,7 @@ process METRICS {
     gatk CollectMultipleMetrics \
     --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=tmp' \
     --INPUT  ${bam} \
-    --OUTPUT ${bam.baseName} \
+    --OUTPUT ${name} \
     --REFERENCE_SEQUENCE ${params.reference} \
     --PROGRAM QualityScoreDistribution \
     --PROGRAM MeanQualityByCycle \
@@ -71,5 +73,32 @@ process METRICS {
     --PROGRAM CollectInsertSizeMetrics \
     --PROGRAM CollectSequencingArtifactMetrics \
     --PROGRAM CollectSequencingArtifactMetrics
+    """
+}
+
+process COVERAGE_ANALYSIS {
+    cpus params.metrics_cpus
+    memory params.metrics_memory
+    tag "${name}"
+    publishDir "${params.output}/${name}/metrics/coverage", mode: "copy"
+
+    conda (params.enable_conda ? "bioconda::samtools=1.12" : null)
+
+    input:
+        tuple val(name), val(type), file(bam), file(bai)
+
+    output:
+        file("${name}.coverage.tsv")
+        file("${name}.depth.tsv")
+
+    script:
+    minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
+        "--min-BQ ${params.collect_hs_metrics_min_base_quality}" : ""
+    minimum_mapping_quality = params.collect_hs_metrics_min_mapping_quality ?
+        "--min-MQ ${params.collect_hs_metrics_min_mapping_quality}" : ""
+    intervals = params.intervals_bed ? "-b ${params.intervals_bed}" : ""
+    """
+    samtools coverage ${minimum_base_quality} ${minimum_mapping_quality} ${bam} > ${name}.coverage.tsv
+    samtools depth -s -d 0 -H ${intervals} ${bam} > ${name}.depth.tsv
     """
 }

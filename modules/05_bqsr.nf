@@ -14,13 +14,13 @@ process BQSR {
     conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
 
     input:
-    tuple val(name), val(bam_name), val(type), file(bam), file(bai)
+    tuple val(name), val(type), file(bam), file(bai)
 
     output:
     tuple val("${name}"), val("${type}"), val("${params.output}/${name}/${bam_name}.preprocessed.bam"), emit: recalibrated_bams
-    file "${bam_name}.recalibration_report.grp"
-    file "${bam_name}.preprocessed.bam"
-    file "${bam_name}.preprocessed.bai"
+    file "${name}.recalibration_report.grp"
+    file "${name}.preprocessed.bam"
+    file "${name}.preprocessed.bai"
 
     """
     mkdir tmp
@@ -28,16 +28,16 @@ process BQSR {
     gatk BaseRecalibrator \
     --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=tmp' \
     --input ${bam} \
-    --output ${bam_name}.recalibration_report.grp \
+    --output ${name}.recalibration_report.grp \
     --reference ${params.reference} \
     --known-sites ${params.dbsnp}
 
     gatk ApplyBQSR \
     --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=tmp' \
     --input ${bam} \
-    --output ${bam_name}.preprocessed.bam \
+    --output ${name}.preprocessed.bam \
     --reference ${params.reference} \
-    --bqsr-recal-file ${bam_name}.recalibration_report.grp
+    --bqsr-recal-file ${name}.recalibration_report.grp
     """
 }
 
@@ -49,15 +49,15 @@ process CREATE_OUTPUT {
     tag "${name}"
 
     input:
-    tuple val(name), val(bam_name), val(type), file(bam), file(bai)
+    tuple val(name), val(type), file(bam), file(bai)
 
     output:
-    tuple val("${name}"), val("${type}"), val("${params.output}/${name}/${bam_name}.preprocessed.bam"), emit: recalibrated_bams
-    file "${bam_name}.preprocessed.bam"
-    file "${bam_name}.preprocessed.bai"
+    tuple val("${name}"), val("${type}"), val("${params.output}/${name}/${name}.preprocessed.bam"), emit: recalibrated_bams
+    file "${name}.preprocessed.bam"
+    file "${name}.preprocessed.bai"
 
     """
-    cp ${bam} ${bam_name}.preprocessed.bam
-    cp ${bai} ${bam_name}.preprocessed.bai
+    cp ${bam} ${name}.preprocessed.bam
+    cp ${bai} ${name}.preprocessed.bai
     """
 }

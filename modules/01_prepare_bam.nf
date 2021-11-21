@@ -23,7 +23,7 @@ process PREPARE_BAM {
     tuple val(name), val(type), file(bam)
 
     output:
-    tuple val(name), val("${bam.baseName}"), val(type), file("${bam.baseName}.prepared.bam"), emit: prepared_bams
+    tuple val(name), val(type), file("${name}.prepared.bam"), emit: prepared_bams
 
     script:
     order = params.skip_deduplication ? "--SORT_ORDER coordinate": "--SORT_ORDER queryname"
@@ -43,7 +43,7 @@ process PREPARE_BAM {
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
     --VALIDATION_STRINGENCY SILENT \
     --INPUT /dev/stdin \
-    --OUTPUT ${bam.baseName}.prepared.bam \
+    --OUTPUT ${name}.prepared.bam \
     --REFERENCE_SEQUENCE ${params.reference} \
     --RGPU 1 \
     --RGID 1 \
@@ -62,11 +62,10 @@ process INDEX_BAM {
     conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
 
     input:
-    tuple val(name), val(bam_name), val(type), file(bam)
+    tuple val(name), val(type), file(bam)
 
     output:
-    tuple val(name), val(bam_name), val(type),
-        file("${bam}"), file("${bam.baseName}.bai"), emit: indexed_bams
+    tuple val(name), val(type), file("${bam}"), file("${bam.baseName}.bai"), emit: indexed_bams
 
     script:
     """
