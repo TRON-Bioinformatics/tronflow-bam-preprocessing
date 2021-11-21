@@ -12,19 +12,23 @@ somatic variant calling. These workflows are implemented in the Nextflow (Di Tom
 Find the documentation here [![Documentation Status](https://readthedocs.org/projects/tronflow-docs/badge/?version=latest)](https://tronflow-docs.readthedocs.io/en/latest/?badge=latest)
 
 
-The aim of this workflow is the preprocessing of BAM files based on Picard and GATK (DePristo, 2011).
+The aim of this workflow is to preprocess BAM files based on Picard and GATK (DePristo, 2011) best practices.
 
 
 ## Background
 
-In order to have a variant calling ready BAM file there are a number of operations that need to be applied on the BAM. This pipeline depends on the particular variant caller, but there are some common operations.
+In order to have a variant calling ready BAM file there are a number of operations that need to be applied on the BAM. 
+This pipeline depends on the particular variant caller, but there are some common operations.
 
-GATK has been providing a well known best practices document on BAM preprocessing, the latest best practices for GATK4 (https://software.broadinstitute.org/gatk/best-practices/workflow?id=11165) does not perform anymore realignment around indels as opposed to best practices for GATK3 (https://software.broadinstitute.org/gatk/documentation/article?id=3238). This pipeline is based on both Picard and GATK. These best practices have been implemented a number of times, see for instance this implementation in Workflow Definition Language https://github.com/gatk-workflows/gatk4-data-processing/blob/master/processing-for-variant-discovery-gatk4.wdl.
+GATK has been providing a well known best practices document on BAM preprocessing, the latest best practices for 
+GATK4 (https://software.broadinstitute.org/gatk/best-practices/workflow?id=11165) does not perform anymore realignment around indels as opposed to best practices for GATK3 (https://software.broadinstitute.org/gatk/documentation/article?id=3238). This pipeline is based on both Picard and GATK. These best practices have been implemented a number of times, see for instance this implementation in Workflow Definition Language https://github.com/gatk-workflows/gatk4-data-processing/blob/master/processing-for-variant-discovery-gatk4.wdl.
 
 
 ## Objectives
 
-We aim at providing a single implementation of the BAM preprocessing pipeline that can be used across different situations. For this purpose there are some required steps and some optional steps. This is implemented as a Nextflow pipeline to simplify parallelization of execution in the cluster. 
+We aim at providing a single implementation of the BAM preprocessing pipeline that can be used across different 
+use cases. 
+For this purpose there are some required steps and some optional steps.  
 
 The input can be either a tab-separated values file (`--input_files`) where each line corresponds to one input BAM or a single BAM (`--input_bam` and `--input_name`).
 
@@ -38,7 +42,7 @@ Steps:
 * **Mark duplicates** (optional). Identify the PCR and the optical duplications and marks those reads. This uses the parallelized version on Spark, it is reported to scale linearly up to 16 CPUs.
 * **Realignment around indels** (optional). This procedure is important for locus based variant callers, but for any variant caller doing haplotype assembly it is not needed. This is computing intensive as it first finds regions for realignment where there are indication of indels  and then it performs a local realignment over those regions. Implemented in GATK3, deprecated in GATK4
 * **Base Quality Score Recalibration (BQSR)** (optional). It aims at correcting systematic errors in the sequencer when assigning the base call quality errors, as these scores are used by variant callers it improves variant calling in some situations. Implemented in GATK4
-* **Metrics** (optional). A number of metrics are obtained over the BAM file with Picard's CollectMetrics (eg: duplication, insert size, alignment, etc.).
+* **Metrics** (optional). A number of metrics are obtained from the BAM file with Picard's CollectMetrics, CollectHsMetrics and samtools' coverage and depth.
 
 ![Pipeline](figures/bam_preprocessing2.png)
 
@@ -49,8 +53,9 @@ Base Quality Score Recalibration (BQSR) requires dbSNP to avoid extracting error
 Realignment around indels requires a set of known indels (`--known_indels1` and `--known_indels2`).
 These resources can be fetched from the GATK bundle https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle.
 
-Optionally, in order to run Picard's CollectHsMetrics an intervals file will need to be provided (`--intervals`). 
-This can be built from a BED file using Picard's BedToIntervalList (https://gatk.broadinstitute.org/hc/en-us/articles/360036883931-BedToIntervalList-Picard-)
+Optionally, in order to run Picard's CollectHsMetrics a BED file will need to be provided (`--intervals`).
+This BED file will also be used for `samtools coverage`.
+
 
 ## How to run it
 
@@ -108,8 +113,11 @@ Computational resources:
 
 Optional output:
     * Recalibration report
+    * Deduplication metrics
     * Realignment intervals
-    * Metrics
+    * GATK multiple metrics
+    * HS metrics
+    * Horizontal and vertical coverage metrics
 ```
 
 
