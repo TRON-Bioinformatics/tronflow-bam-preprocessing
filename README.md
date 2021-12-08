@@ -84,7 +84,7 @@ Optional input:
     * --dbsnp: path to the dbSNP VCF (required to perform BQSR)
     * --known_indels1: path to a VCF of known indels (optional to perform realignment around indels)
     * --known_indels2: path to a second VCF of known indels (optional to perform realignment around indels)
-    * --intervals: path to an intervals file to collect HS metrics from, this can be built with Picard's BedToIntervalList (default: None)
+    * --intervals: path to a BED file to collect coverage and HS metrics from (default: None)
     * --collect_hs_minimum_base_quality: minimum base quality for a base to contribute coverage (default: 20).
     * --collect_hs_minimum_mapping_quality: minimum mapping quality for a read to contribute coverage (default: 20).
     * --skip_bqsr: optionally skip BQSR (default: false)
