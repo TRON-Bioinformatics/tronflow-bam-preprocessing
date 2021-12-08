@@ -30,27 +30,26 @@ process PREPARE_BAM {
     """
     mkdir tmp
 
-    gatk CleanSam \
-    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
-    --INPUT ${bam} \
-    --OUTPUT /dev/stdout | \
-    gatk ReorderSam \
-    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
-    --INPUT /dev/stdin \
-    --OUTPUT /dev/stdout \
-    --SEQUENCE_DICTIONARY ${params.reference} | \
     gatk AddOrReplaceReadGroups \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
     --VALIDATION_STRINGENCY SILENT \
-    --INPUT /dev/stdin \
-    --OUTPUT ${name}.prepared.bam \
+    --INPUT ${bam} \
+    --OUTPUT /dev/stdout \
     --REFERENCE_SEQUENCE ${params.reference} \
     --RGPU 1 \
     --RGID 1 \
     --RGSM ${type} \
     --RGLB 1 \
-    --RGPL ${params.platform} \
-    ${order}
+    --RGPL ${params.platform} ${order} | \
+    gatk CleanSam \
+    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
+    --INPUT /dev/stdin \
+    --OUTPUT /dev/stdout | \
+    gatk ReorderSam \
+    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
+    --INPUT /dev/stdin \
+    --OUTPUT ${name}.prepared.bam \
+    --SEQUENCE_DICTIONARY ${params.reference}
     """
 }
 
