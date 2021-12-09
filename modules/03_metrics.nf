@@ -33,15 +33,15 @@ process HS_METRICS {
 
     gatk BedToIntervalList \
     --INPUT ${params.intervals} \
-    --OUTPUT ${params.intervals}.intervals \
+    --OUTPUT my.intervals \
     --SEQUENCE_DICTIONARY ${bam}
 
     gatk CollectHsMetrics \
     --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=tmp' \
     --INPUT  ${bam} \
     --OUTPUT ${name}.hs_metrics.txt \
-    --TARGET_INTERVALS ${params.intervals}.intervals \
-    --BAIT_INTERVALS ${params.intervals}.intervals \
+    --TARGET_INTERVALS my.intervals \
+    --BAIT_INTERVALS my.intervals \
     ${minimum_base_quality} ${minimum_mapping_quality}
     """
 }
