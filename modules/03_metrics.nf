@@ -52,7 +52,8 @@ process METRICS {
     tag "${name}"
     publishDir "${params.output}/${name}/metrics/gatk_multiple_metrics", mode: "copy"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
+    // NOTE: the method CollectMultipleMetrics has a hidden dependency to R for making plots
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0 r::r=3.6.0" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
