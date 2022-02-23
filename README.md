@@ -46,16 +46,6 @@ Steps:
 
 ![Pipeline](figures/bam_preprocessing2.png)
 
-## References
-
-The bam preprocessing workflow requires the human reference genome (`--reference`)
-Base Quality Score Recalibration (BQSR) requires dbSNP to avoid extracting error metrics from polymorphic sites (`--dbsnp`)
-Realignment around indels requires a set of known indels (`--known_indels1` and `--known_indels2`).
-These resources can be fetched from the GATK bundle https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle.
-
-Optionally, in order to run Picard's CollectHsMetrics a BED file will need to be provided (`--intervals`).
-This BED file will also be used for `samtools coverage`.
-
 
 ## How to run it
 
@@ -133,8 +123,26 @@ The table with FASTQ files expects two tab-separated columns **without a header*
 
 The values used in `sample type` are arbitrary. These will be set in the BAM header tag @RG:SM for sample. There may be some downstream constraints, eg: Mutect2 pipeline requires that the sample type between normal and tumor samples of the same pair are not the same.
 
+### References
 
-## References
+The BAM preprocessing workflow requires the human reference genome (`--reference`)
+Base Quality Score Recalibration (BQSR) requires dbSNP to avoid extracting error metrics from polymorphic sites (`--dbsnp`)
+Realignment around indels requires a set of known indels (`--known_indels1` and `--known_indels2`).
+These resources can be fetched from the GATK bundle https://gatk.broadinstitute.org/hc/en-us/articles/360035890811-Resource-bundle.
+
+Optionally, in order to run Picard's CollectHsMetrics a BED file will need to be provided (`--intervals`).
+This BED file will also be used for `samtools coverage`.
+
+## Troubleshooting
+
+### Too new Java version for MarkDuplicatesSpark
+
+When using Java 11 the cryptic error messsage `java.lang.IllegalArgumentException: Unsupported class file major version 55` has been observed.
+This issue is described here and the solution is to use Java 8 https://gatk.broadinstitute.org/hc/en-us/community/posts/360056174592-MarkDuplicatesSpark-crash.
+
+
+
+## Biblipgraphy
 
 * DePristo M, Banks E, Poplin R, Garimella K, Maguire J, Hartl C, Philippakis A, del Angel G, Rivas MA, Hanna M, McKenna A, Fennell T, Kernytsky A, Sivachenko A, Cibulskis K, Gabriel S, Altshuler D, Daly M. (2011). A framework for variation discovery and genotyping using next-generation DNA sequencing data. Nat Genet, 43:491-498. DOI: 10.1038/ng.806.
 * Di Tommaso, P., Chatzou, M., Floden, E. W., Barja, P. P., Palumbo, E., & Notredame, C. (2017). Nextflow enables reproducible computational workflows. Nature Biotechnology, 35(4), 316–319. 10.1038/nbt.3820
