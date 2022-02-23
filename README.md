@@ -120,6 +120,19 @@ Optional output:
     * Horizontal and vertical coverage metrics
 ```
 
+### Input table
+
+The table with FASTQ files expects two tab-separated columns **without a header**
+
+| Sample name          | Sample type                      | BAM                  |
+|----------------------|---------------------------------|------------------------------|
+| sample_1             | normal      |    /path/to/sample_1.normal.bam   |
+| sample_1             | tumor      |    /path/to/sample_1.tumor.bam   |
+| sample_2             | normal      |    /path/to/sample_2.normal.bam   |
+| sample_2             | tumor      |    /path/to/sample_2.tumor.bam   |
+
+The values used in `sample type` are arbitrary. These will be set in the BAM header tag @RG:SM for sample. There may be some downstream constraints, eg: Mutect2 pipeline requires that the sample type between normal and tumor samples of the same pair are not the same.
+
 
 ## References
 
