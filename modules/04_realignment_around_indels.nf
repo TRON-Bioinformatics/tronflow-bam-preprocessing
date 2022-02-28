@@ -13,7 +13,7 @@ process REALIGNMENT_AROUND_INDELS {
     publishDir "${params.output}/${name}/metrics/realignment", mode: "copy", pattern: "*.RA.intervals"
 
     // NOTE: this dependency is fixed to GATK 3 as the realignment around indels is not anymore maintained in GATK 4
-    // but still for some reason for GATK 3 to work the dependency to GATK 4 is needed
+    // but still for some reason for GATK 3 to work the dependency to GATK 4.2.0.0 is needed
     conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0 bioconda::gatk=3.8" : null)
 
     input:

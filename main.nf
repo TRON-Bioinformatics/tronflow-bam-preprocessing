@@ -30,8 +30,8 @@ params.collect_hs_metrics_min_mapping_quality = false
 // computational resources
 params.prepare_bam_cpus = 3
 params.prepare_bam_memory = "8g"
-params.mark_duplicates_cpus = 16
-params.mark_duplicates_memory = "64g"
+params.mark_duplicates_cpus = 2
+params.mark_duplicates_memory = "16g"
 params.realignment_around_indels_cpus = 2
 params.realignment_around_indels_memory = "31g"
 params.bqsr_cpus = 3

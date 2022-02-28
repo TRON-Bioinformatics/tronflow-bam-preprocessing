@@ -1,5 +1,5 @@
-params.mark_duplicates_cpus = 16
-params.mark_duplicates_memory = "64g"
+params.mark_duplicates_cpus = 2
+params.mark_duplicates_memory = "16g"
 params.remove_duplicates = true
 params.skip_metrics = false
 params.output = 'output'
@@ -11,7 +11,7 @@ process MARK_DUPLICATES {
     tag "${name}"
     publishDir "${params.output}/${name}/metrics/mark_duplicates", mode: "copy", pattern: "*.dedup_metrics.txt"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
 
     input:
     tuple val(name), val(type), file(bam)
@@ -21,15 +21,25 @@ process MARK_DUPLICATES {
     file("${name}.dedup_metrics.txt") optional true
 
     script:
-    dedup_metrics = params.skip_metrics ? "": "--metrics-file ${name}.dedup_metrics.txt"
-    remove_duplicates = params.remove_duplicates ? "--remove-all-duplicates true" : "--remove-all-duplicates false"
+    dedup_metrics = params.skip_metrics ? "": "--METRICS_FILE ${name}.dedup_metrics.txt"
+    remove_duplicates = params.remove_duplicates ? "--REMOVE_DUPLICATES true" : "--REMOVE_DUPLICATES false"
     """
     mkdir tmp
 
-    gatk MarkDuplicatesSpark \
+    gatk SortSam \
+    --INPUT ${bam} \
+    --OUTPUT ${name}.sorted.bam \
+    --SORT_ORDER coordinate
+
+    gatk MarkDuplicates \
     --java-options '-Xmx${params.mark_duplicates_memory}  -Djava.io.tmpdir=tmp' \
-    --input  ${bam} \
-    --output ${name}.dedup.bam \
-    --conf 'spark.executor.cores=${task.cpus}' ${remove_duplicates} ${dedup_metrics}
+    --INPUT  ${name}.sorted.bam \
+    --OUTPUT ${name}.dedup.bam \
+    --ASSUME_SORT_ORDER coordinate \
+    --CREATE_INDEX true ${remove_duplicates} ${dedup_metrics}
+
+    cp ${name}.dedup.bai ${name}.dedup.bam.bai
+
+    rm -f ${name}.sorted.bam
     """
 }
