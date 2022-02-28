@@ -11,7 +11,7 @@ process MARK_DUPLICATES {
     tag "${name}"
     publishDir "${params.output}/${name}/metrics/mark_duplicates", mode: "copy", pattern: "*.dedup_metrics.txt"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
 
     input:
     tuple val(name), val(type), file(bam)

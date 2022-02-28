@@ -13,7 +13,7 @@ process HS_METRICS {
     tag "${name}"
     publishDir "${params.output}/${name}/metrics/hs_metrics", mode: "copy"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
@@ -53,7 +53,7 @@ process METRICS {
     publishDir "${params.output}/${name}/metrics/gatk_multiple_metrics", mode: "copy"
 
     // NOTE: the method CollectMultipleMetrics has a hidden dependency to R for making plots
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0 r::r=3.6.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0 r::r=3.6.0" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
