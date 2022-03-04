@@ -26,14 +26,14 @@ process BQSR {
     mkdir tmp
 
     gatk BaseRecalibrator \
-    --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=tmp' \
+    --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=./tmp' \
     --input ${bam} \
     --output ${name}.recalibration_report.grp \
     --reference ${params.reference} \
     --known-sites ${params.dbsnp}
 
     gatk ApplyBQSR \
-    --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=tmp' \
+    --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=./tmp' \
     --input ${bam} \
     --output ${name}.preprocessed.bam \
     --reference ${params.reference} \

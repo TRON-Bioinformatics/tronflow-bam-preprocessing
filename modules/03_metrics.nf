@@ -37,7 +37,7 @@ process HS_METRICS {
     --SEQUENCE_DICTIONARY ${bam}
 
     gatk CollectHsMetrics \
-    --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=tmp' \
+    --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=./tmp' \
     --INPUT  ${bam} \
     --OUTPUT ${name}.hs_metrics.txt \
     --TARGET_INTERVALS my.intervals \
@@ -66,7 +66,7 @@ process METRICS {
     mkdir tmp
 
     gatk CollectMultipleMetrics \
-    --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=tmp' \
+    --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=./tmp' \
     --INPUT  ${bam} \
     --OUTPUT ${name} \
     --REFERENCE_SEQUENCE ${params.reference} \
