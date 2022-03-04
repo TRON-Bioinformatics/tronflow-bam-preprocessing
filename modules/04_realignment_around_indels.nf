@@ -31,12 +31,12 @@ process REALIGNMENT_AROUND_INDELS {
     """
     mkdir tmp
 
-    gatk3 -Xmx${params.realignment_around_indels_memory} -Djava.io.tmpdir=tmp -T RealignerTargetCreator \
+    gatk3 -Xmx${params.realignment_around_indels_memory} -Djava.io.tmpdir=./tmp -T RealignerTargetCreator \
     --input_file ${bam} \
     --out ${name}.RA.intervals \
     --reference_sequence ${params.reference} ${known_indels1} ${known_indels2}
 
-    gatk3 -Xmx${params.realignment_around_indels_memory} -Djava.io.tmpdir=tmp -T IndelRealigner \
+    gatk3 -Xmx${params.realignment_around_indels_memory} -Djava.io.tmpdir=./tmp -T IndelRealigner \
     --input_file ${bam} \
     --out ${name}.realigned.bam \
     --reference_sequence ${params.reference} \

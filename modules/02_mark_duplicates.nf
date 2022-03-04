@@ -32,7 +32,7 @@ process MARK_DUPLICATES {
     --SORT_ORDER coordinate
 
     gatk MarkDuplicates \
-    --java-options '-Xmx${params.mark_duplicates_memory}  -Djava.io.tmpdir=tmp' \
+    --java-options '-Xmx${params.mark_duplicates_memory}  -Djava.io.tmpdir=./tmp' \
     --INPUT  ${name}.sorted.bam \
     --OUTPUT ${name}.dedup.bam \
     --ASSUME_SORT_ORDER coordinate \

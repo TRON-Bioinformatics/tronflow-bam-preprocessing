@@ -31,7 +31,7 @@ process PREPARE_BAM {
     mkdir tmp
 
     gatk AddOrReplaceReadGroups \
-    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
+    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --VALIDATION_STRINGENCY SILENT \
     --INPUT ${bam} \
     --OUTPUT /dev/stdout \
@@ -42,11 +42,11 @@ process PREPARE_BAM {
     --RGLB 1 \
     --RGPL ${params.platform} ${order} | \
     gatk CleanSam \
-    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
+    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --INPUT /dev/stdin \
     --OUTPUT /dev/stdout | \
     gatk ReorderSam \
-    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=tmp' \
+    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --INPUT /dev/stdin \
     --OUTPUT ${name}.prepared.bam \
     --SEQUENCE_DICTIONARY ${params.reference}
@@ -71,7 +71,7 @@ process INDEX_BAM {
     mkdir tmp
 
     gatk BuildBamIndex \
-    --java-options '-Xmx8g  -Djava.io.tmpdir=tmp' \
+    --java-options '-Xmx8g  -Djava.io.tmpdir=./tmp' \
     --INPUT  ${bam}
     """
 }
