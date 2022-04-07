@@ -8,8 +8,9 @@ params.output = 'output'
 process BQSR {
     cpus "${params.bqsr_cpus}"
     memory "${params.bqsr_memory}"
-    publishDir "${params.output}/${name}", mode: "copy"
     tag "${name}"
+    publishDir "${params.output}/${name}", mode: "copy"
+    publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
     conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
 
@@ -21,6 +22,7 @@ process BQSR {
     file "${name}.recalibration_report.grp"
     file "${name}.preprocessed.bam"
     file "${name}.preprocessed.bai"
+    file("software_versions.${task.process}.txt")
 
     """
     mkdir tmp
@@ -38,6 +40,9 @@ process BQSR {
     --output ${name}.preprocessed.bam \
     --reference ${params.reference} \
     --bqsr-recal-file ${name}.recalibration_report.grp
+
+    echo ${params.manifest} >> software_versions.${task.process}.txt
+    gatk --version >> software_versions.${task.process}.txt
     """
 }
 

@@ -10,6 +10,7 @@ process MARK_DUPLICATES {
     memory "${params.mark_duplicates_memory}"
     tag "${name}"
     publishDir "${params.output}/${name}/metrics/mark_duplicates", mode: "copy", pattern: "*.dedup_metrics.txt"
+    publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
     conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
 
@@ -19,6 +20,7 @@ process MARK_DUPLICATES {
     output:
     tuple val(name), val(type), file("${name}.dedup.bam"), file("${name}.dedup.bam.bai"), emit: deduplicated_bams
     file("${name}.dedup_metrics.txt") optional true
+    file("software_versions.${task.process}.txt")
 
     script:
     dedup_metrics = params.skip_metrics ? "": "--METRICS_FILE ${name}.dedup_metrics.txt"
@@ -41,5 +43,8 @@ process MARK_DUPLICATES {
     cp ${name}.dedup.bai ${name}.dedup.bam.bai
 
     rm -f ${name}.sorted.bam
+
+    echo ${params.manifest} >> software_versions.${task.process}.txt
+    gatk --version >> software_versions.${task.process}.txt
     """
 }
