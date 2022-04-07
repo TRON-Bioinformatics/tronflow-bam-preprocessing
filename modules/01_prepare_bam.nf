@@ -17,7 +17,7 @@ process PREPARE_BAM {
     memory "${params.prepare_bam_memory}"
     tag "${name}"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0 bioconda::samtools=1.12" : null)
 
     input:
     tuple val(name), val(type), file(bam)
@@ -30,11 +30,12 @@ process PREPARE_BAM {
     """
     mkdir tmp
 
+    samtools sort --threads ${params.prepare_bam_cpus} ${bam} | \
     gatk AddOrReplaceReadGroups \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --VALIDATION_STRINGENCY SILENT \
     --INPUT ${bam} \
-    --OUTPUT /dev/stdout \
+    --OUTPUT /dev/stdin \
     --REFERENCE_SEQUENCE ${params.reference} \
     --RGPU 1 \
     --RGID 1 \
