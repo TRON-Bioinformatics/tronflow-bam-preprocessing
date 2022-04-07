@@ -44,6 +44,7 @@ process MARK_DUPLICATES {
 
     rm -f ${name}.sorted.bam
 
+    echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
     """
 }

@@ -41,6 +41,7 @@ process BQSR {
     --reference ${params.reference} \
     --bqsr-recal-file ${name}.recalibration_report.grp
 
+    echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
     """
 }

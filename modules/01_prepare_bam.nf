@@ -59,6 +59,7 @@ process PREPARE_BAM {
 
     rm -f ${name}.sorted.bam
 
+    echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
     samtools --version >> software_versions.${task.process}.txt
     """
@@ -87,6 +88,7 @@ process INDEX_BAM {
     --java-options '-Xmx8g  -Djava.io.tmpdir=./tmp' \
     --INPUT  ${bam}
 
+    echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
     """
 }

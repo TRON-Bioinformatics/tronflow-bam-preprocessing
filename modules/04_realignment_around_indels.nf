@@ -47,6 +47,7 @@ process REALIGNMENT_AROUND_INDELS {
     --LODThresholdForCleaning 0.4 \
     --maxReadsInMemory 600000 ${known_alleles1} ${known_alleles2}
 
+    echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk3 --version >> software_versions.${task.process}.txt
     """
 }

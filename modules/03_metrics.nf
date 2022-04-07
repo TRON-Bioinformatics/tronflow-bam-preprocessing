@@ -46,6 +46,7 @@ process HS_METRICS {
     --BAIT_INTERVALS my.intervals \
     ${minimum_base_quality} ${minimum_mapping_quality}
 
+    echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
     """
 }
@@ -85,6 +86,7 @@ process METRICS {
     --PROGRAM CollectSequencingArtifactMetrics \
     --PROGRAM CollectSequencingArtifactMetrics
 
+    echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
     """
 }
@@ -116,6 +118,7 @@ process COVERAGE_ANALYSIS {
     samtools coverage ${minimum_base_quality} ${minimum_mapping_quality} ${bam} > ${name}.coverage.tsv
     samtools depth -s -d 0 -H ${intervals} ${bam} > ${name}.depth.tsv
 
+    echo ${params.manifest} >> software_versions.${task.process}.txt
     samtools --version >> software_versions.${task.process}.txt
     """
 }
