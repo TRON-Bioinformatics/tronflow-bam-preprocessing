@@ -29,6 +29,7 @@ process MARK_DUPLICATES {
     mkdir tmp
 
     gatk SortSam \
+    --java-options '-Xmx${params.mark_duplicates_memory}  -Djava.io.tmpdir=./tmp' \
     --INPUT ${bam} \
     --OUTPUT ${name}.sorted.bam \
     --SORT_ORDER coordinate
