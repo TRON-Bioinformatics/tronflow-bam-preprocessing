@@ -16,7 +16,7 @@ process PREPARE_BAM {
     tag "${name}"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0 bioconda::samtools=1.12" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
 
     input:
     tuple val(name), val(type), file(bam)
@@ -53,7 +53,6 @@ process PREPARE_BAM {
 
     echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
-    samtools --version >> software_versions.${task.process}.txt
     """
 }
 
