@@ -2,7 +2,6 @@ params.metrics_cpus = 1
 params.metrics_memory = "8g"
 params.collect_hs_metrics_min_base_quality = false
 params.collect_hs_metrics_min_mapping_quality = false
-params.reference = false
 params.output = 'output'
 params.intervals = false
 
@@ -63,6 +62,7 @@ process METRICS {
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
+    val(reference)
 
     output:
     file("*_metrics") optional true
@@ -76,7 +76,7 @@ process METRICS {
     --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=./tmp' \
     --INPUT  ${bam} \
     --OUTPUT ${name} \
-    --REFERENCE_SEQUENCE ${params.reference} \
+    --REFERENCE_SEQUENCE ${reference} \
     --PROGRAM QualityScoreDistribution \
     --PROGRAM MeanQualityByCycle \
     --PROGRAM CollectAlignmentSummaryMetrics \

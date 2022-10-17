@@ -3,7 +3,6 @@ params.prepare_bam_memory = "8g"
 params.index_cpus = 1
 params.index_memory = "8g"
 params.platform = "ILLUMINA"
-params.reference = false
 params.skip_deduplication = false
 params.output = 'output'
 
@@ -22,6 +21,7 @@ process PREPARE_BAM {
 
     input:
     tuple val(name), val(type), file(bam)
+    val(reference)
 
     output:
     tuple val(name), val(type), file("${name}.prepared.bam"), emit: prepared_bams
@@ -41,7 +41,7 @@ process PREPARE_BAM {
     --VALIDATION_STRINGENCY SILENT \
     --INPUT ${name}.sorted.bam \
     --OUTPUT /dev/stdout \
-    --REFERENCE_SEQUENCE ${params.reference} \
+    --REFERENCE_SEQUENCE ${reference} \
     --RGPU 1 \
     --RGID 1 \
     --RGSM ${type} \
@@ -55,7 +55,7 @@ process PREPARE_BAM {
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --INPUT /dev/stdin \
     --OUTPUT ${name}.prepared.bam \
-    --SEQUENCE_DICTIONARY ${params.reference}
+    --SEQUENCE_DICTIONARY ${reference}
 
     rm -f ${name}.sorted.bam
 

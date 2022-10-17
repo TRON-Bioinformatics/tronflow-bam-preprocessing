@@ -3,7 +3,7 @@
 nextflow.enable.dsl = 2
 
 include { PREPARE_BAM; INDEX_BAM } from './modules/01_prepare_bam'
-include { MARK_DUPLICATES } from './modules/02_mark_duplicates'
+include { MARK_DUPLICATES; SPLIT_CIGAR_N_READS } from './modules/02_mark_duplicates'
 include { METRICS; HS_METRICS; COVERAGE_ANALYSIS } from './modules/03_metrics'
 include { REALIGNMENT_AROUND_INDELS } from './modules/04_realignment_around_indels'
 include { BQSR; CREATE_OUTPUT } from './modules/05_bqsr'
@@ -26,6 +26,7 @@ params.output = 'output'
 params.platform = "ILLUMINA"
 params.collect_hs_metrics_min_base_quality = false
 params.collect_hs_metrics_min_mapping_quality = false
+params.split_cigarn = false
 
 // computational resources
 params.prepare_bam_cpus = 3
@@ -84,7 +85,7 @@ else if (params.input_files) {
 
 workflow {
 
-    PREPARE_BAM(input_files)
+    PREPARE_BAM(input_files, params.reference)
 
     if (!params.skip_deduplication) {
         MARK_DUPLICATES(PREPARE_BAM.out.prepared_bams)
@@ -95,16 +96,21 @@ workflow {
         deduplicated_bams = INDEX_BAM.out.indexed_bams
     }
 
+    if (params.split_cigarn) {
+        SPLIT_CIGAR_N_READS(deduplicated_bams, params.reference)
+        deduplicated_bams = SPLIT_CIGAR_N_READS.out.split_cigarn_bams
+    }
+
     if (! params.skip_metrics) {
         if (params.intervals) {
             HS_METRICS(deduplicated_bams)
         }
-        METRICS(deduplicated_bams)
+        METRICS(deduplicated_bams, params.reference)
         COVERAGE_ANALYSIS(deduplicated_bams)
     }
 
     if (!params.skip_realignment) {
-        REALIGNMENT_AROUND_INDELS(deduplicated_bams)
+        REALIGNMENT_AROUND_INDELS(deduplicated_bams, params.reference)
         realigned_bams = REALIGNMENT_AROUND_INDELS.out.realigned_bams
     }
     else {
@@ -112,7 +118,7 @@ workflow {
     }
 
     if (!params.skip_bqsr) {
-        BQSR(realigned_bams)
+        BQSR(realigned_bams, params.reference)
         preprocessed_bams = BQSR.out.recalibrated_bams
     }
     else {
