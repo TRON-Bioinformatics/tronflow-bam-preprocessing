@@ -72,10 +72,10 @@ process SPLIT_CIGAR_N_READS {
 
     gatk SplitNCigarReads \
     --java-options '-Xmx${params.prepare_bam_memory}  -Djava.io.tmpdir=./tmp' \
-    --INPUT ${bam} \
-    --OUTPUT ${name}.split_cigarn.bam \
-    --CREATE_INDEX true \
-    --REFERENCE ${reference}
+    --input ${bam} \
+    --output ${name}.split_cigarn.bam \
+    --create-output-bam-index true \
+    --reference ${reference}
 
     cp ${name}.split_cigarn.bai ${name}.split_cigarn.bam.bai
 
