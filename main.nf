@@ -4,7 +4,7 @@ nextflow.enable.dsl = 2
 
 include { PREPARE_BAM; INDEX_BAM } from './modules/01_prepare_bam'
 include { MARK_DUPLICATES; SPLIT_CIGAR_N_READS } from './modules/02_mark_duplicates'
-include { METRICS; HS_METRICS; COVERAGE_ANALYSIS } from './modules/03_metrics'
+include { METRICS; HS_METRICS; COVERAGE_ANALYSIS; FLAGSTAT } from './modules/03_metrics'
 include { REALIGNMENT_AROUND_INDELS } from './modules/04_realignment_around_indels'
 include { BQSR; CREATE_OUTPUT } from './modules/05_bqsr'
 
@@ -107,6 +107,7 @@ workflow {
         }
         METRICS(deduplicated_bams, params.reference)
         COVERAGE_ANALYSIS(deduplicated_bams)
+        FLAGSTAT(deduplicated_bams)
     }
 
     if (!params.skip_realignment) {

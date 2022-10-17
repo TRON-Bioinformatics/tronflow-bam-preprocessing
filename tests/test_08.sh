@@ -9,7 +9,7 @@ nextflow main.nf -profile test,conda --output $output --collect_hs_metrics_min_b
 test -s $output/sample1/sample1.preprocessed.bam || { echo "Missing BAM file!"; exit 1; }
 test -s $output/sample1/sample1.preprocessed.bai || { echo "Missing BAI file!"; exit 1; }
 test -s $output/sample1/metrics/hs_metrics/sample1.hs_metrics.txt || { echo "Missing HS metrics file!"; exit 1; }
-test -s $output/sample1/metrics/mark_duplicates/sample1.dedup_metrics.txt || { echo "Missing dedup metrics file!"; exit 1; }
+test -s $output/sample1/metrics/flagstat/sample1.flagstat.csv || { echo "Missing dedup metrics file!"; exit 1; }
 test -s $output/sample1/metrics/coverage/sample1.coverage.tsv || { echo "Missing horizontal coverage file!"; exit 1; }
 test -s $output/sample1/metrics/coverage/sample1.depth.tsv || { echo "Missing depth of coverage file!"; exit 1; }
 test -s $output/sample2/sample2.preprocessed.bam || { echo "Missing BAM file!"; exit 1; }

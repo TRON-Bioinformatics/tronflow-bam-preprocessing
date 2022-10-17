@@ -122,3 +122,31 @@ process COVERAGE_ANALYSIS {
     samtools --version >> software_versions.${task.process}.txt
     """
 }
+
+process FLAGSTAT {
+    cpus "${params.metrics_cpus}"
+    memory "${params.metrics_memory}"
+    tag "${name}"
+    publishDir "${params.output}/${name}/metrics/flagstat", mode: "copy", pattern: "*.flagstat.csv"
+    publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
+
+    conda (params.enable_conda ? "bioconda::sambamba=0.8.2" : null)
+
+    input:
+    tuple val(name), val(type), file(bam)
+
+    output:
+    file("${name}.flagstat.csv")
+    file("software_versions.${task.process}.txt")
+
+    script:
+    """
+    sambamba flagstat \
+        --nthreads=${task.cpus} \
+        --tabular \
+        ${bam} > ${name}.flagstat.csv
+
+    echo ${params.manifest} >> software_versions.${task.process}.txt
+    sambamba --version >> software_versions.${task.process}.txt
+    """
+}
