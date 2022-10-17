@@ -3,7 +3,6 @@ params.prepare_bam_memory = "8g"
 params.index_cpus = 1
 params.index_memory = "8g"
 params.platform = "ILLUMINA"
-params.skip_deduplication = false
 params.output = 'output'
 
 /*
@@ -28,25 +27,20 @@ process PREPARE_BAM {
     file("software_versions.${task.process}.txt")
 
     script:
-    order = params.skip_deduplication ? "--SORT_ORDER coordinate": "--SORT_ORDER queryname"
     """
     mkdir tmp
-
-    samtools sort \
-    --threads ${params.prepare_bam_cpus} \
-    -o ${name}.sorted.bam ${bam}
 
     gatk AddOrReplaceReadGroups \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --VALIDATION_STRINGENCY SILENT \
-    --INPUT ${name}.sorted.bam \
+    --INPUT ${bam} \
     --OUTPUT /dev/stdout \
     --REFERENCE_SEQUENCE ${reference} \
     --RGPU 1 \
     --RGID 1 \
     --RGSM ${type} \
     --RGLB 1 \
-    --RGPL ${params.platform} ${order} | \
+    --RGPL ${params.platform} | \
     gatk CleanSam \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --INPUT /dev/stdin \
@@ -56,8 +50,6 @@ process PREPARE_BAM {
     --INPUT /dev/stdin \
     --OUTPUT ${name}.prepared.bam \
     --SEQUENCE_DICTIONARY ${reference}
-
-    rm -f ${name}.sorted.bam
 
     echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt

@@ -133,7 +133,7 @@ process FLAGSTAT {
     conda (params.enable_conda ? "bioconda::sambamba=0.8.2" : null)
 
     input:
-    tuple val(name), val(type), file(bam)
+    tuple val(name), val(type), file(bam), file(bai)
 
     output:
     file("${name}.flagstat.csv")
