@@ -16,7 +16,7 @@ process PREPARE_BAM {
     tag "${name}"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0 bioconda::samtools=1.12" : null)
 
     input:
     tuple val(name), val(type), file(bam)
@@ -30,10 +30,14 @@ process PREPARE_BAM {
     """
     mkdir tmp
 
+    samtools sort \
+    --threads ${params.prepare_bam_cpus} \
+    -o ${name}.sorted.bam ${bam}
+
     gatk AddOrReplaceReadGroups \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --VALIDATION_STRINGENCY SILENT \
-    --INPUT ${bam} \
+    --INPUT ${name}.sorted.bam \
     --OUTPUT /dev/stdout \
     --REFERENCE_SEQUENCE ${reference} \
     --RGPU 1 \
@@ -50,6 +54,8 @@ process PREPARE_BAM {
     --INPUT /dev/stdin \
     --OUTPUT ${name}.prepared.bam \
     --SEQUENCE_DICTIONARY ${reference}
+
+    rm -f ${name}.sorted.bam
 
     echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
