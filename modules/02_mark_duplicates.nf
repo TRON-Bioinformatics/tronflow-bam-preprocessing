@@ -24,7 +24,7 @@ process MARK_DUPLICATES {
     """
     mkdir tmp
 
-    # sort again
+    # sort
     sambamba sort \
         --nthreads=${task.cpus} \
         --tmpdir=./tmp \

@@ -62,7 +62,7 @@ process INDEX_BAM {
     tag "${name}"
     publishDir "${params.output}/${name}", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::sambamba=0.8.2" : null)
 
     input:
     tuple val(name), val(type), file(bam)
@@ -75,11 +75,19 @@ process INDEX_BAM {
     """
     mkdir tmp
 
-    gatk BuildBamIndex \
-    --java-options '-Xmx8g  -Djava.io.tmpdir=./tmp' \
-    --INPUT  ${bam}
+    # sort
+    sambamba sort \
+        --nthreads=${task.cpus} \
+        --tmpdir=./tmp \
+        --out=${name}.sorted.bam \
+        ${bam}
+
+    # indexes the output BAM file
+    sambamba index \
+        --nthreads=${task.cpus} \
+        ${name}.sorted.bam ${name}.sorted.bam.bai
 
     echo ${params.manifest} >> software_versions.${task.process}.txt
-    gatk --version >> software_versions.${task.process}.txt
+    sambamba --version >> software_versions.${task.process}.txt
     """
 }
