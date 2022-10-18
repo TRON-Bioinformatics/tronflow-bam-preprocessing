@@ -68,7 +68,7 @@ process INDEX_BAM {
     tuple val(name), val(type), file(bam)
 
     output:
-    tuple val(name), val(type), file("${bam}"), file("${bam.baseName}.bai"), emit: indexed_bams
+    tuple val(name), val(type), file("${name}.sorted.bam"), file("${name}.sorted.bam.bai"), emit: indexed_bams
     file("software_versions.${task.process}.txt")
 
     script:
