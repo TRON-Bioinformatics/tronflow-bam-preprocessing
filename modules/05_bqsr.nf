@@ -1,6 +1,5 @@
 params.bqsr_cpus = 3
 params.bqsr_memory = "4g"
-params.reference = false
 params.dbsnp = false
 params.output = 'output'
 
@@ -16,6 +15,7 @@ process BQSR {
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
+    val(reference)
 
     output:
     tuple val("${name}"), val("${type}"), val("${params.output}/${name}/${bam_name}.preprocessed.bam"), emit: recalibrated_bams
@@ -31,14 +31,14 @@ process BQSR {
     --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=./tmp' \
     --input ${bam} \
     --output ${name}.recalibration_report.grp \
-    --reference ${params.reference} \
+    --reference ${reference} \
     --known-sites ${params.dbsnp}
 
     gatk ApplyBQSR \
     --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=./tmp' \
     --input ${bam} \
     --output ${name}.preprocessed.bam \
-    --reference ${params.reference} \
+    --reference ${reference} \
     --bqsr-recal-file ${name}.recalibration_report.grp
 
     echo ${params.manifest} >> software_versions.${task.process}.txt

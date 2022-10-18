@@ -16,3 +16,4 @@ test:
 	bash tests/test_07.sh
 	bash tests/test_08.sh
 	bash tests/test_09.sh
+	bash tests/test_10.sh

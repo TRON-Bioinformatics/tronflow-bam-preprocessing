@@ -2,7 +2,6 @@ params.metrics_cpus = 1
 params.metrics_memory = "8g"
 params.collect_hs_metrics_min_base_quality = false
 params.collect_hs_metrics_min_mapping_quality = false
-params.reference = false
 params.output = 'output'
 params.intervals = false
 
@@ -63,6 +62,7 @@ process METRICS {
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
+    val(reference)
 
     output:
     file("*_metrics") optional true
@@ -76,7 +76,7 @@ process METRICS {
     --java-options '-Xmx${params.metrics_memory}  -Djava.io.tmpdir=./tmp' \
     --INPUT  ${bam} \
     --OUTPUT ${name} \
-    --REFERENCE_SEQUENCE ${params.reference} \
+    --REFERENCE_SEQUENCE ${reference} \
     --PROGRAM QualityScoreDistribution \
     --PROGRAM MeanQualityByCycle \
     --PROGRAM CollectAlignmentSummaryMetrics \
@@ -120,5 +120,33 @@ process COVERAGE_ANALYSIS {
 
     echo ${params.manifest} >> software_versions.${task.process}.txt
     samtools --version >> software_versions.${task.process}.txt
+    """
+}
+
+process FLAGSTAT {
+    cpus "${params.metrics_cpus}"
+    memory "${params.metrics_memory}"
+    tag "${name}"
+    publishDir "${params.output}/${name}/metrics/flagstat", mode: "copy", pattern: "*.flagstat.csv"
+    publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
+
+    conda (params.enable_conda ? "bioconda::sambamba=0.8.2" : null)
+
+    input:
+    tuple val(name), val(type), file(bam), file(bai)
+
+    output:
+    file("${name}.flagstat.csv")
+    file("software_versions.${task.process}.txt")
+
+    script:
+    """
+    sambamba flagstat \
+        --nthreads=${task.cpus} \
+        --tabular \
+        ${bam} > ${name}.flagstat.csv
+
+    echo ${params.manifest} >> software_versions.${task.process}.txt
+    sambamba --version >> software_versions.${task.process}.txt
     """
 }
