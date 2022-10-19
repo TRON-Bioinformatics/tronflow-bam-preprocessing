@@ -7,3 +7,5 @@ timeline.html*
 trace.txt*
 dag.dot*
 *.swp
+/test_data/ucsc.hg19.minimal.without_indices.dict
+/test_data/ucsc.hg19.minimal.without_indices.fasta.fai

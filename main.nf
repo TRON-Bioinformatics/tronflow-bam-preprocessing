@@ -7,6 +7,7 @@ include { MARK_DUPLICATES; SPLIT_CIGAR_N_READS } from './modules/02_mark_duplica
 include { METRICS; HS_METRICS; COVERAGE_ANALYSIS; FLAGSTAT } from './modules/03_metrics'
 include { REALIGNMENT_AROUND_INDELS } from './modules/04_realignment_around_indels'
 include { BQSR; CREATE_OUTPUT } from './modules/05_bqsr'
+include { CREATE_FAIDX; CREATE_DICT } from './modules/00_reference_indices'
 
 params.help= false
 params.input_files = false
@@ -82,8 +83,31 @@ else if (params.input_files) {
     .set { input_files }
 }
 
+workflow CHECK_REFERENCE {
+    take:
+        reference
+
+    main:
+        // checks the reference and its indexes, if the indexes are not there creates them
+        reference_file = file(reference)
+        if (reference_file.isEmpty()) {
+            log.error "--reference points to a non existing file"
+            exit 1
+        }
+        faidx = file("${reference}.fai")
+        if (faidx.isEmpty()) {
+            CREATE_FAIDX(reference)
+        }
+        dict =  file("${reference_file.getParent() }/${reference_file.baseName }*.dict")
+        if (dict.isEmpty()) {
+            CREATE_DICT(reference)
+        }
+}
+
 
 workflow {
+
+    CHECK_REFERENCE(params.reference)
 
     PREPARE_BAM(input_files, params.reference)
 
