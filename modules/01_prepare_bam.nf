@@ -31,14 +31,10 @@ process PREPARE_BAM {
     """
     mkdir tmp
 
-    samtools sort \
-    --threads ${params.prepare_bam_cpus} \
-    -o ${name}.sorted.bam ${bam}
-
     gatk AddOrReplaceReadGroups \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --VALIDATION_STRINGENCY SILENT \
-    --INPUT ${name}.sorted.bam \
+    --INPUT ${bam} \
     --OUTPUT /dev/stdout \
     --REFERENCE_SEQUENCE ${reference} \
     --RGPU 1 \
@@ -55,8 +51,6 @@ process PREPARE_BAM {
     --INPUT /dev/stdin \
     --OUTPUT ${name}.prepared.bam \
     --SEQUENCE_DICTIONARY ${reference}
-
-    rm -f ${name}.sorted.bam
 
     echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
