@@ -87,6 +87,9 @@ workflow CHECK_REFERENCE {
     take:
         reference
 
+    emit:
+        checked_reference = reference
+
     main:
         // checks the reference and its indexes, if the indexes are not there creates them
         reference_file = file(reference)
@@ -109,7 +112,7 @@ workflow {
 
     CHECK_REFERENCE(params.reference)
 
-    PREPARE_BAM(input_files, params.reference)
+    PREPARE_BAM(input_files, CHECK_REFERENCE.out.checked_reference)
 
     if (!params.skip_deduplication) {
         MARK_DUPLICATES(PREPARE_BAM.out.prepared_bams)
@@ -121,7 +124,7 @@ workflow {
     }
 
     if (params.split_cigarn) {
-        SPLIT_CIGAR_N_READS(deduplicated_bams, params.reference)
+        SPLIT_CIGAR_N_READS(deduplicated_bams, CHECK_REFERENCE.out.checked_reference)
         deduplicated_bams = SPLIT_CIGAR_N_READS.out.split_cigarn_bams
     }
 
@@ -129,13 +132,13 @@ workflow {
         if (params.intervals) {
             HS_METRICS(deduplicated_bams)
         }
-        METRICS(deduplicated_bams, params.reference)
+        METRICS(deduplicated_bams, CHECK_REFERENCE.out.checked_reference)
         COVERAGE_ANALYSIS(deduplicated_bams)
         FLAGSTAT(deduplicated_bams)
     }
 
     if (!params.skip_realignment) {
-        REALIGNMENT_AROUND_INDELS(deduplicated_bams, params.reference)
+        REALIGNMENT_AROUND_INDELS(deduplicated_bams, CHECK_REFERENCE.out.checked_reference)
         realigned_bams = REALIGNMENT_AROUND_INDELS.out.realigned_bams
     }
     else {
@@ -143,7 +146,7 @@ workflow {
     }
 
     if (!params.skip_bqsr) {
-        BQSR(realigned_bams, params.reference)
+        BQSR(realigned_bams, CHECK_REFERENCE.out.checked_reference)
         preprocessed_bams = BQSR.out.recalibrated_bams
     }
     else {
