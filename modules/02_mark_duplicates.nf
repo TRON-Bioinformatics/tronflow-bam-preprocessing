@@ -1,5 +1,7 @@
 params.mark_duplicates_cpus = 2
 params.mark_duplicates_memory = "16g"
+params.split_reads_cpus = 2
+params.split_reads_memory = "4g"
 params.remove_duplicates = true
 params.output = 'output'
 
@@ -50,8 +52,8 @@ process MARK_DUPLICATES {
 }
 
 process SPLIT_CIGAR_N_READS {
-    cpus "${params.prepare_bam_cpus}"
-    memory "${params.prepare_bam_memory}"
+    cpus "${params.split_reads_cpus}"
+    memory "${params.split_reads_memory}"
     tag "${name}"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
@@ -70,7 +72,7 @@ process SPLIT_CIGAR_N_READS {
     mkdir tmp
 
     gatk SplitNCigarReads \
-    --java-options '-Xmx${params.prepare_bam_memory}  -Djava.io.tmpdir=./tmp' \
+    --java-options '-Xmx${params.split_reads_memory}  -Djava.io.tmpdir=./tmp' \
     --input ${bam} \
     --output ${name}.split_cigarn.bam \
     --create-output-bam-index true \
