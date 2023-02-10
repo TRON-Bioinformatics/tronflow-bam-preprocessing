@@ -60,13 +60,13 @@ Usage:
 
 Input:
     * --input_bam: the path to a single BAM (this option is not compatible with --input_files)
-    * --input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file (this option is not compatible with --input_bam)
+    * --input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file. The sample name should be unique for each bam file. (this option is not compatible with --input_bam)
     Sample type will be added to the BAM header @SN sample name
     The input file does not have header!
     Example input file:
-    name1       tumor   tumor.1.bam
-    name1       normal  normal.1.bam
-    name2       tumor   tumor.2.bam
+    name1_t   tumor   tumor.1.bam
+    name1_n   normal  normal.1.bam
+    name2_t   tumor   tumor.2.bam
     * --reference: path to the FASTA genome reference (indexes expected *.fai, *.dict)
 
 Optional input:
