@@ -1,0 +1,33 @@
+name: Automated tests
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-java@v2
+      with:
+        distribution: 'zulu' # See 'Supported distributions' for available options
+        java-version: '11'
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        channels: defaults,conda-forge,bioconda
+    - name: Install dependencies
+      run: |
+        apt-get update && apt-get --assume-yes install wget make procps software-properties-common
+        wget -qO- https://get.nextflow.io | bash && cp nextflow /usr/local/bin/nextflow
+        conda update conda
+    - name: Cache conda environments
+      uses: actions/cache@v2
+      with:
+        path: |
+          /home/runner/work/tronflow-bam-preprocessing/tronflow-bam-preprocessing/work/conda
+        key: ${{ runner.os }}-tronflow-bam-preprocessing
+    - name: Run tests
+      run: |
+        export NXF_VER=22.04.5
+        make
