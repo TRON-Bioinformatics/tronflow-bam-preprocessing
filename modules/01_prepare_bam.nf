@@ -25,7 +25,7 @@ process PREPARE_BAM {
 
     output:
     tuple val(name), val(type), file("${name}.prepared.bam"), emit: prepared_bams
-    file("software_versions.${task.process}.txt")
+    file("software_versions.PREPARE_BAM.txt")
 
     script:
     """
@@ -58,8 +58,8 @@ process PREPARE_BAM {
 
     rm -f ${name}.sorted.bam
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    gatk --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.PREPARE_BAM.txt
+    gatk --version >> software_versions.PREPARE_BAM.txt
     """
 }
 
@@ -76,7 +76,7 @@ process INDEX_BAM {
 
     output:
     tuple val(name), val(type), file("${name}.sorted.bam"), file("${name}.sorted.bam.bai"), emit: indexed_bams
-    file("software_versions.${task.process}.txt")
+    file("software_versions.INDEX_BAM.txt")
 
     script:
     """
@@ -94,7 +94,7 @@ process INDEX_BAM {
         --nthreads=${task.cpus} \
         ${name}.sorted.bam ${name}.sorted.bam.bai
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    sambamba --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.INDEX_BAM.txt
+    sambamba --version >> software_versions.INDEX_BAM.txt
     """
 }

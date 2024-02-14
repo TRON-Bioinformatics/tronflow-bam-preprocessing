@@ -22,7 +22,7 @@ process HS_METRICS {
     file("*_metrics") optional true
     file("*.pdf") optional true
     file("${name}.hs_metrics.txt")
-    file("software_versions.${task.process}.txt")
+    file("software_versions.HS_METRICS.txt")
 
     script:
     minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
@@ -45,8 +45,8 @@ process HS_METRICS {
     --BAIT_INTERVALS my.intervals \
     ${minimum_base_quality} ${minimum_mapping_quality}
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    gatk --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.HS_METRICS.txt
+    gatk --version >> software_versions.HS_METRICS.txt
     """
 }
 
@@ -67,7 +67,7 @@ process METRICS {
     output:
     file("*_metrics") optional true
     file("*.pdf") optional true
-    file("software_versions.${task.process}.txt")
+    file("software_versions.METRICS.txt")
 
     """
     mkdir tmp
@@ -86,8 +86,8 @@ process METRICS {
     --PROGRAM CollectSequencingArtifactMetrics \
     --PROGRAM CollectSequencingArtifactMetrics
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    gatk --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.METRICS.txt
+    gatk --version >> software_versions.METRICS.txt
     """
 }
 
@@ -106,7 +106,7 @@ process COVERAGE_ANALYSIS {
     output:
         file("${name}.coverage.tsv")
         file("${name}.depth.tsv")
-        file("software_versions.${task.process}.txt")
+        file("software_versions.COVERAGE_ANALYSIS.txt")
 
     script:
     minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
@@ -118,8 +118,8 @@ process COVERAGE_ANALYSIS {
     samtools coverage ${minimum_base_quality} ${minimum_mapping_quality} ${bam} > ${name}.coverage.tsv
     samtools depth -s -d 0 -H ${intervals} ${bam} > ${name}.depth.tsv
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    samtools --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.COVERAGE_ANALYSIS.txt
+    samtools --version >> software_versions.COVERAGE_ANALYSIS.txt
     """
 }
 
@@ -137,7 +137,7 @@ process FLAGSTAT {
 
     output:
     file("${name}.flagstat.csv")
-    file("software_versions.${task.process}.txt")
+    file("software_versions.FLAGSTAT.txt")
 
     script:
     """
@@ -146,7 +146,7 @@ process FLAGSTAT {
         --tabular \
         ${bam} > ${name}.flagstat.csv
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    sambamba --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.FLAGSTAT.txt
+    sambamba --version >> software_versions.FLAGSTAT.txt
     """
 }

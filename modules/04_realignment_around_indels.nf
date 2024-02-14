@@ -23,7 +23,7 @@ process REALIGNMENT_AROUND_INDELS {
     output:
     tuple val(name), val(type), file("${name}.realigned.bam"), file("${name}.realigned.bai"), emit: realigned_bams
     file("${name}.RA.intervals")
-    file("software_versions.${task.process}.txt")
+    file("software_versions.REALIGNMENT_AROUND_INDELS.txt")
 
     script:
     known_indels1 = params.known_indels1 ? " --known ${params.known_indels1}" : ""
@@ -47,7 +47,7 @@ process REALIGNMENT_AROUND_INDELS {
     --LODThresholdForCleaning 0.4 \
     --maxReadsInMemory 600000 ${known_alleles1} ${known_alleles2}
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    gatk3 --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.REALIGNMENT_AROUND_INDELS.txt
+    gatk3 --version >> software_versions.REALIGNMENT_AROUND_INDELS.txt
     """
 }

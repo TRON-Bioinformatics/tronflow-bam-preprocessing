@@ -19,7 +19,7 @@ process MARK_DUPLICATES {
 
     output:
     tuple val(name), val(type), file("${name}.dedup.bam"), file("${name}.dedup.bam.bai"), emit: deduplicated_bams
-    file("software_versions.${task.process}.txt")
+    file("software_versions.MARK_DUPLICATES.txt")
 
     script:
     remove_duplicates_param = params.remove_duplicates ? "--remove-duplicates" : ""
@@ -46,8 +46,8 @@ process MARK_DUPLICATES {
         --nthreads=${task.cpus} \
         ${name}.dedup.bam ${name}.dedup.bam.bai
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    sambamba --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.MARK_DUPLICATES.txt
+    sambamba --version >> software_versions.MARK_DUPLICATES.txt
     """
 }
 
@@ -65,7 +65,7 @@ process SPLIT_CIGAR_N_READS {
 
     output:
     tuple val(name), val(type), file("${name}.split_cigarn.bam"), file("${name}.split_cigarn.bam.bai"), emit: split_cigarn_bams
-    file("software_versions.${task.process}.txt")
+    file("software_versions.SPLIT_CIGAR_N_READS.txt")
 
     script:
     """
@@ -80,7 +80,7 @@ process SPLIT_CIGAR_N_READS {
 
     cp ${name}.split_cigarn.bai ${name}.split_cigarn.bam.bai
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    gatk --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.SPLIT_CIGAR_N_READS.txt
+    gatk --version >> software_versions.SPLIT_CIGAR_N_READS.txt
     """
 }

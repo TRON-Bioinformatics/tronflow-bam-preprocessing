@@ -22,7 +22,7 @@ process BQSR {
     file "${name}.recalibration_report.grp"
     file "${name}.preprocessed.bam"
     file "${name}.preprocessed.bai"
-    file("software_versions.${task.process}.txt")
+    file("software_versions.BQSR.txt")
 
     """
     mkdir tmp
@@ -41,8 +41,8 @@ process BQSR {
     --reference ${reference} \
     --bqsr-recal-file ${name}.recalibration_report.grp
 
-    echo ${params.manifest} >> software_versions.${task.process}.txt
-    gatk --version >> software_versions.${task.process}.txt
+    echo ${params.manifest} >> software_versions.BQSR.txt
+    gatk --version >> software_versions.BQSR.txt
     """
 }
 
