@@ -18,7 +18,7 @@ process BQSR {
     val(reference)
 
     output:
-    tuple val("${name}"), val("${type}"), val("${params.output}/${name}/${bam_name}.preprocessed.bam"), emit: recalibrated_bams
+    tuple val("${name}"), val("${type}"), val("${params.output}/${name}/${name}.preprocessed.bam"), emit: recalibrated_bams
     file "${name}.recalibration_report.grp"
     file "${name}.preprocessed.bam"
     file "${name}.preprocessed.bai"
