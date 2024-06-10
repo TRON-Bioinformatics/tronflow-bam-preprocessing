@@ -3,7 +3,7 @@
 
 source tests/assert.sh
 output=output/test10
-nextflow main.nf -profile test,conda --output $output --skip_realignment --split_cigarn
+nextflow main.nf -profile test,conda,ci --output $output --skip_realignment --split_cigarn
 
 test -s $output/sample1/sample1.preprocessed.bam || { echo "Missing output BAM file!"; exit 1; }
 test -s $output/sample1/sample1.preprocessed.bai || { echo "Missing output BAI file!"; exit 1; }
