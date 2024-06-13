@@ -4,6 +4,7 @@ params.split_reads_cpus = 2
 params.split_reads_memory = "4g"
 params.remove_duplicates = true
 params.output = 'output'
+params.split_cigarn_args = ""
 
 
 process MARK_DUPLICATES {
@@ -76,7 +77,8 @@ process SPLIT_CIGAR_N_READS {
     --input ${bam} \
     --output ${name}.split_cigarn.bam \
     --create-output-bam-index true \
-    --reference ${reference}
+    --reference ${reference} \
+    ${params.split_cigarn_args}
 
     cp ${name}.split_cigarn.bai ${name}.split_cigarn.bam.bai
 

@@ -3,7 +3,7 @@
 
 source tests/assert.sh
 output=output/test8
-nextflow main.nf -profile test,conda --output $output --collect_hs_metrics_min_base_quality 10 \
+nextflow main.nf -profile test,conda,ci --output $output --collect_hs_metrics_min_base_quality 10 \
 --collect_hs_metrics_min_mapping_quality 10 --remove_duplicates false --skip_bqsr --skip_realignment
 
 test -s $output/sample1/sample1.preprocessed.bam || { echo "Missing BAM file!"; exit 1; }
