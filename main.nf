@@ -77,14 +77,20 @@ workflow {
 
     CHECK_REFERENCE(params.reference)
 
-    // PREPARE_BAM(input_files, CHECK_REFERENCE.out.checked_reference)
+    if (params.skip_prepare_bam) {
+        processed_bams = input_files
+    }
+    else {
+        PREPARE_BAM(input_files, CHECK_REFERENCE.out.checked_reference)
+        processed_bams = PREPARE_BAM.out.prepared_bams
+    }
 
     if (!params.skip_deduplication) {
-        MARK_DUPLICATES(input_files)
+        MARK_DUPLICATES(processed_bams)
         deduplicated_bams = MARK_DUPLICATES.out.deduplicated_bams
     }
     else {
-        SORT_AND_INDEX_BAM(input_files)
+        SORT_AND_INDEX_BAM(processed_bams)
         deduplicated_bams = SORT_AND_INDEX_BAM.out.sorted_and_indexed_bams
     }
 
