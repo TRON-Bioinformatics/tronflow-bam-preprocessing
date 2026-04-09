@@ -5,7 +5,7 @@ process HS_METRICS {
     publishDir "${params.output}/${name}/metrics/hs_metrics", mode: "copy"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
@@ -50,7 +50,7 @@ process METRICS {
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
     // NOTE: the method CollectMultipleMetrics has a hidden dependency to R for making plots
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0 r::r=3.6.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version} r::r=3.6.0" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
@@ -90,7 +90,7 @@ process COVERAGE_ANALYSIS {
     publishDir "${params.output}/${name}/metrics/coverage", mode: "copy"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::samtools=1.12" : null)
+    conda (params.enable_conda ? "bioconda::samtools=${params.samtools_version}" : null)
 
     input:
         tuple val(name), val(type), file(bam), file(bai)
@@ -122,7 +122,7 @@ process FLAGSTAT {
     publishDir "${params.output}/${name}/metrics/flagstat", mode: "copy", pattern: "*.flagstat.csv"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::sambamba=0.8.2" : null)
+    conda (params.enable_conda ? "bioconda::sambamba=${params.sambamba_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)

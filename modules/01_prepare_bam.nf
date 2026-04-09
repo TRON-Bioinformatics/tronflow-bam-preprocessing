@@ -9,7 +9,7 @@ process PREPARE_BAM {
     tag "${name}"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0 bioconda::samtools=1.12" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version} bioconda::samtools=${params.samtools_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam)
@@ -77,7 +77,7 @@ process SORT_AND_INDEX_BAM {
     tag "${name}"
     publishDir "${params.output}/${name}", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::sambamba=0.8.2" : null)
+    conda (params.enable_conda ? "bioconda::sambamba=${params.sambamba_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam)

@@ -5,7 +5,7 @@ process BQSR {
     publishDir "${params.output}/${name}", mode: "copy"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)

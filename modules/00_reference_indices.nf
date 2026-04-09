@@ -4,7 +4,7 @@ process CREATE_FAIDX {
     memory "4g"
     tag "${name}"
 
-    conda (params.enable_conda ? "bioconda::samtools=1.12" : null)
+    conda (params.enable_conda ? "bioconda::samtools=${params.samtools_version}" : null)
 
     input:
     val(reference)
@@ -23,7 +23,7 @@ process CREATE_DICT {
     memory "4g"
     tag "${name}"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version}" : null)
 
     input:
     val(reference)
