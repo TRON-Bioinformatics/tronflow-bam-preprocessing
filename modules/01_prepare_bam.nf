@@ -31,33 +31,49 @@ process PREPARE_BAM {
     """
     mkdir tmp
 
+    set -euo pipefail
+    
     samtools sort \
     --threads ${params.prepare_bam_cpus} \
     -o ${name}.sorted.bam ${bam}
-
+    
+    echo "Step 1: AddOrReplaceReadGroups"
     gatk AddOrReplaceReadGroups \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --VALIDATION_STRINGENCY SILENT \
     --INPUT ${name}.sorted.bam \
-    --OUTPUT /dev/stdout \
+    --OUTPUT ${name}.rg.bam \
     --REFERENCE_SEQUENCE ${reference} \
     --RGPU 1 \
     --RGID 1 \
     --RGSM ${type} \
     --RGLB 1 \
-    --RGPL ${params.platform} | \
+    --RGPL ${params.platform}
+    
+    samtools quickcheck ${name}.rg.bam
+    rm -f ${name}.sorted.bam
+    
+    echo "Step 2: CleanSam"
     gatk CleanSam \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
-    --INPUT /dev/stdin \
-    --OUTPUT /dev/stdout | \
+    --INPUT ${name}.rg.bam \
+    --OUTPUT ${name}.cleaned.bam
+    
+    samtools quickcheck ${name}.cleaned.bam
+    rm ${name}.rg.bam
+    
+    echo "Step 3: ReorderSam"
     gatk ReorderSam \
-    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
-    --INPUT /dev/stdin \
-    --OUTPUT ${name}.prepared.bam \
-    --SEQUENCE_DICTIONARY ${reference}
-
-    rm -f ${name}.sorted.bam
-
+      --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
+      --INPUT ${name}.cleaned.bam \
+      --OUTPUT ${name}.prepared.bam \
+      --SEQUENCE_DICTIONARY ${reference}
+    
+    samtools quickcheck ${name}.prepared.bam
+    rm ${name}.cleaned.bam
+    
+    echo "Done."
+    
     echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
     """
