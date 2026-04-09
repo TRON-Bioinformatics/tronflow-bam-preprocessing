@@ -15,8 +15,8 @@ process REALIGNMENT_AROUND_INDELS {
 
     output:
     tuple val(name), val(type), file("${name}.realigned.bam"), file("${name}.realigned.bai"), emit: realigned_bams
-    file("${name}.RA.intervals")
-    file("software_versions.${task.process}.txt")
+    path("${name}.RA.intervals")
+    path("software_versions.${task.process}.txt")
 
     script:
     known_indels1 = params.known_indels1 ? " --known ${params.known_indels1}" : ""

@@ -11,7 +11,7 @@ process MARK_DUPLICATES {
 
     output:
     tuple val(name), val(type), file("${name}.dedup.bam"), file("${name}.dedup.bam.bai"), emit: deduplicated_bams
-    file("software_versions.${task.process}.txt")
+    path("software_versions.${task.process}.txt")
 
     script:
     remove_duplicates_param = params.remove_duplicates ? "--remove-duplicates" : ""
@@ -57,7 +57,7 @@ process SPLIT_CIGAR_N_READS {
 
     output:
     tuple val(name), val(type), file("${name}.split_cigarn.bam"), file("${name}.split_cigarn.bam.bai"), emit: split_cigarn_bams
-    file("software_versions.${task.process}.txt")
+    path("software_versions.${task.process}.txt")
 
     script:
     """

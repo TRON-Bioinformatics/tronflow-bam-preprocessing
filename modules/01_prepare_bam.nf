@@ -17,7 +17,7 @@ process PREPARE_BAM {
 
     output:
     tuple val(name), val(type), file("${name}.prepared.bam"), emit: prepared_bams
-    file("software_versions.${task.process}.txt")
+    path("software_versions.${task.process}.txt")
 
     script:
     """
@@ -84,7 +84,7 @@ process INDEX_BAM {
 
     output:
     tuple val(name), val(type), file("${name}.sorted.bam"), file("${name}.sorted.bam.bai"), emit: indexed_bams
-    file("software_versions.${task.process}.txt")
+    path("software_versions.${task.process}.txt")
 
     script:
     """

@@ -10,7 +10,7 @@ process CREATE_FAIDX {
     val(reference)
 
     output:
-    file("*")
+    path("*")
 
     script:
     """
@@ -29,7 +29,7 @@ process CREATE_DICT {
     val(reference)
 
     output:
-    file("*")
+    path("*")
 
     script:
     """

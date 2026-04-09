@@ -11,10 +11,10 @@ process HS_METRICS {
     tuple val(name), val(type), file(bam), file(bai)
 
     output:
-    file("*_metrics").optional()
-    file("*.pdf").optional()
-    file("${name}.hs_metrics.txt")
-    file("software_versions.${task.process}.txt")
+    path("*_metrics", optional: true)
+    path("*.pdf", optional: true)
+    path("${name}.hs_metrics.txt")
+    path("software_versions.${task.process}.txt")
 
     script:
     minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
@@ -57,9 +57,9 @@ process METRICS {
     val(reference)
 
     output:
-    file("*_metrics").optional()
-    file("*.pdf").optional()
-    file("software_versions.${task.process}.txt")
+    path("*_metrics", optional: true)
+    path("*.pdf", optional: true)
+    path("software_versions.${task.process}.txt")
 
     """
     mkdir tmp
@@ -96,9 +96,9 @@ process COVERAGE_ANALYSIS {
         tuple val(name), val(type), file(bam), file(bai)
 
     output:
-        file("${name}.coverage.tsv")
-        file("${name}.depth.tsv")
-        file("software_versions.${task.process}.txt")
+        path("${name}.coverage.tsv")
+        path("${name}.depth.tsv")
+        path("software_versions.${task.process}.txt")
 
     script:
     minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
@@ -128,8 +128,8 @@ process FLAGSTAT {
     tuple val(name), val(type), file(bam), file(bai)
 
     output:
-    file("${name}.flagstat.csv")
-    file("software_versions.${task.process}.txt")
+    path("${name}.flagstat.csv")
+    path("software_versions.${task.process}.txt")
 
     script:
     """
