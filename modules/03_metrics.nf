@@ -50,7 +50,7 @@ process METRICS {
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
     // NOTE: the method CollectMultipleMetrics has a hidden dependency to R for making plots
-    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version} r::r=3.6.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version} r::r=${params.r_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
