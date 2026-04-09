@@ -1,11 +1,3 @@
-params.mark_duplicates_cpus = 2
-params.mark_duplicates_memory = "16g"
-params.split_reads_cpus = 2
-params.split_reads_memory = "4g"
-params.remove_duplicates = true
-params.output = 'output'
-
-
 process MARK_DUPLICATES {
     cpus "${params.mark_duplicates_cpus}"
     memory "${params.mark_duplicates_memory}"

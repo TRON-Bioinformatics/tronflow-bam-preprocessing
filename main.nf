@@ -9,41 +9,6 @@ include { REALIGNMENT_AROUND_INDELS } from './modules/04_realignment_around_inde
 include { BQSR; CREATE_OUTPUT } from './modules/05_bqsr'
 include { CREATE_FAIDX; CREATE_DICT } from './modules/00_reference_indices'
 
-params.help= false
-params.input_files = false
-params.input_name = "normal"
-params.input_bam = false
-params.reference = false
-params.dbsnp = false
-params.known_indels1 = false
-params.known_indels2 = false
-params.intervals = false
-params.skip_bqsr = false
-params.skip_realignment = false
-params.skip_deduplication = false
-params.remove_duplicates = true
-params.skip_metrics = false
-params.output = 'output'
-params.platform = "ILLUMINA"
-params.collect_hs_metrics_min_base_quality = false
-params.collect_hs_metrics_min_mapping_quality = false
-params.split_cigarn = false
-
-// computational resources
-params.prepare_bam_cpus = 4
-params.prepare_bam_memory = "8g"
-params.mark_duplicates_cpus = 8
-params.mark_duplicates_memory = "24g"
-params.realignment_around_indels_cpus = 4
-params.realignment_around_indels_memory = "32g"
-params.bqsr_cpus = 8
-params.bqsr_memory = "16g"
-params.metrics_cpus = 1
-params.metrics_memory = "8g"
-params.index_cpus = 4
-params.index_memory = "16g"
-
-
 
 def helpMessage() {
     log.info params.help_message

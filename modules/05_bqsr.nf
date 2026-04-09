@@ -1,9 +1,3 @@
-params.bqsr_cpus = 3
-params.bqsr_memory = "4g"
-params.dbsnp = false
-params.output = 'output'
-
-
 process BQSR {
     cpus "${params.bqsr_cpus}"
     memory "${params.bqsr_memory}"

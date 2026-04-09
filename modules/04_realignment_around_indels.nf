@@ -1,10 +1,3 @@
-params.realignment_around_indels_cpus = 2
-params.realignment_around_indels_memory = "31g"
-params.known_indels1 = false
-params.known_indels2 = false
-params.output = 'output'
-
-
 process REALIGNMENT_AROUND_INDELS {
     cpus "${params.realignment_around_indels_cpus}"
     memory "${params.realignment_around_indels_memory}"

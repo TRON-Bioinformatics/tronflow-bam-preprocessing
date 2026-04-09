@@ -1,11 +1,3 @@
-params.prepare_bam_cpus = 3
-params.prepare_bam_memory = "8g"
-params.index_cpus = 1
-params.index_memory = "8g"
-params.platform = "ILLUMINA"
-params.output = 'output'
-
-
 /*
 This step sets MAPQ to 0 for all unmapped reads + avoids soft clipping beyond the end of the reference genome
 This step reorders chromosomes in the BAM file according to the provided reference (this step is required for GATK)

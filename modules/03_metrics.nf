@@ -1,11 +1,3 @@
-params.metrics_cpus = 1
-params.metrics_memory = "8g"
-params.collect_hs_metrics_min_base_quality = false
-params.collect_hs_metrics_min_mapping_quality = false
-params.output = 'output'
-params.intervals = false
-
-
 process HS_METRICS {
     cpus params.metrics_cpus
     memory params.metrics_memory
