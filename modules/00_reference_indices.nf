@@ -9,6 +9,10 @@ process CREATE_FAIDX {
     input:
     val(reference)
 
+    output:
+    file("*")
+
+    script:
     """
     samtools faidx ${reference}
     """
@@ -24,6 +28,10 @@ process CREATE_DICT {
     input:
     val(reference)
 
+    output:
+    file("*")
+
+    script:
     """
     gatk CreateSequenceDictionary --REFERENCE ${reference}
     """

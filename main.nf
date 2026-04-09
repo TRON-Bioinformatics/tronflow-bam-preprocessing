@@ -30,18 +30,18 @@ params.collect_hs_metrics_min_mapping_quality = false
 params.split_cigarn = false
 
 // computational resources
-params.prepare_bam_cpus = 3
+params.prepare_bam_cpus = 4
 params.prepare_bam_memory = "8g"
-params.mark_duplicates_cpus = 2
-params.mark_duplicates_memory = "16g"
-params.realignment_around_indels_cpus = 2
-params.realignment_around_indels_memory = "31g"
-params.bqsr_cpus = 3
-params.bqsr_memory = "4g"
+params.mark_duplicates_cpus = 8
+params.mark_duplicates_memory = "24g"
+params.realignment_around_indels_cpus = 4
+params.realignment_around_indels_memory = "32g"
+params.bqsr_cpus = 8
+params.bqsr_memory = "16g"
 params.metrics_cpus = 1
 params.metrics_memory = "8g"
-params.index_cpus = 1
-params.index_memory = "8g"
+params.index_cpus = 4
+params.index_memory = "16g"
 
 
 
@@ -84,27 +84,27 @@ else if (params.input_files) {
 }
 
 workflow CHECK_REFERENCE {
+
     take:
         reference
-
-    emit:
-        checked_reference = reference
-
     main:
-        // checks the reference and its indexes, if the indexes are not there creates them
         reference_file = file(reference)
-        if (reference_file.isEmpty()) {
-            log.error "--reference points to a non existing file"
-            exit 1
+
+        if (!reference_file.exists()) {
+            error "--reference points to a non existing file"
         }
-        faidx = file("${reference}.fai")
-        if (faidx.isEmpty()) {
+
+        if (!file("${reference}.fai").exists()) {
             CREATE_FAIDX(reference)
         }
-        dict =  file("${reference_file.getParent() }/${reference_file.baseName }*.dict")
-        if (dict.isEmpty()) {
+
+        dict_file = reference.toString().replaceFirst(/\.(fa|fasta)$/, ".dict")
+
+        if (!file(dict_file).exists()) {
             CREATE_DICT(reference)
         }
+    emit:
+        checked_reference = reference
 }
 
 
@@ -112,14 +112,14 @@ workflow {
 
     CHECK_REFERENCE(params.reference)
 
-    PREPARE_BAM(input_files, CHECK_REFERENCE.out.checked_reference)
+    // PREPARE_BAM(input_files, CHECK_REFERENCE.out.checked_reference)
 
     if (!params.skip_deduplication) {
-        MARK_DUPLICATES(PREPARE_BAM.out.prepared_bams)
+        MARK_DUPLICATES(input_files)
         deduplicated_bams = MARK_DUPLICATES.out.deduplicated_bams
     }
     else {
-        INDEX_BAM(PREPARE_BAM.out.prepared_bams)
+        INDEX_BAM(input_files)
         deduplicated_bams = INDEX_BAM.out.indexed_bams
     }
 

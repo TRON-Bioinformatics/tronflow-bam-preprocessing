@@ -19,8 +19,8 @@ process HS_METRICS {
     tuple val(name), val(type), file(bam), file(bai)
 
     output:
-    file("*_metrics") optional true
-    file("*.pdf") optional true
+    file("*_metrics").optional()
+    file("*.pdf").optional()
     file("${name}.hs_metrics.txt")
     file("software_versions.${task.process}.txt")
 
@@ -65,8 +65,8 @@ process METRICS {
     val(reference)
 
     output:
-    file("*_metrics") optional true
-    file("*.pdf") optional true
+    file("*_metrics").optional()
+    file("*.pdf").optional()
     file("software_versions.${task.process}.txt")
 
     """

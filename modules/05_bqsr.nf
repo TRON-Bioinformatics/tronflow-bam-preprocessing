@@ -61,6 +61,7 @@ process CREATE_OUTPUT {
     file "${name}.preprocessed.bam"
     file "${name}.preprocessed.bai"
 
+    script:
     """
     cp ${bam} ${name}.preprocessed.bam
     cp ${bai} ${name}.preprocessed.bai
