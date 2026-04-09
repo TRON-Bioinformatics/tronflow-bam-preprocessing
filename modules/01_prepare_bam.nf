@@ -71,7 +71,7 @@ process PREPARE_BAM {
     """
 }
 
-process INDEX_BAM {
+process SORT_AND_INDEX_BAM {
     cpus "${params.index_cpus}"
     memory "${params.index_memory}"
     tag "${name}"
@@ -83,7 +83,7 @@ process INDEX_BAM {
     tuple val(name), val(type), file(bam)
 
     output:
-    tuple val(name), val(type), file("${name}.sorted.bam"), file("${name}.sorted.bam.bai"), emit: indexed_bams
+    tuple val(name), val(type), file("${name}.sorted.bam"), file("${name}.sorted.bam.bai"), emit: sorted_and_indexed_bams
     path("software_versions.${task.process}.txt")
 
     script:

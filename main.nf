@@ -2,7 +2,7 @@
 
 nextflow.enable.dsl = 2
 
-include { PREPARE_BAM; INDEX_BAM } from './modules/01_prepare_bam'
+include { PREPARE_BAM; SORT_AND_INDEX_BAM } from './modules/01_prepare_bam'
 include { MARK_DUPLICATES; SPLIT_CIGAR_N_READS } from './modules/02_mark_duplicates'
 include { METRICS; HS_METRICS; COVERAGE_ANALYSIS; FLAGSTAT } from './modules/03_metrics'
 include { REALIGNMENT_AROUND_INDELS } from './modules/04_realignment_around_indels'
@@ -84,8 +84,8 @@ workflow {
         deduplicated_bams = MARK_DUPLICATES.out.deduplicated_bams
     }
     else {
-        INDEX_BAM(input_files)
-        deduplicated_bams = INDEX_BAM.out.indexed_bams
+        SORT_AND_INDEX_BAM(input_files)
+        deduplicated_bams = SORT_AND_INDEX_BAM.out.sorted_and_indexed_bams
     }
 
     if (params.split_cigarn) {
