@@ -5,14 +5,14 @@ process BQSR {
     publishDir "${params.output}/${name}", mode: "copy"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version}" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version} bioconda::sambamba=${params.sambamba_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
     val(reference)
 
     output:
-    tuple val("${name}"), val("${type}"), val("${params.output}/${name}/${bam_name}.preprocessed.bam"), emit: recalibrated_bams
+    tuple val("${name}"), val("${type}"), val("${params.output}/${name}/${name}.preprocessed.bam"), emit: recalibrated_bams
     path "${name}.recalibration_report.grp"
     path "${name}.preprocessed.bam"
     path "${name}.preprocessed.bai"
@@ -32,11 +32,17 @@ process BQSR {
     --java-options '-Xmx${params.bqsr_memory} -Djava.io.tmpdir=./tmp' \
     --input ${bam} \
     --output ${name}.preprocessed.bam \
+    --create-output-bam-index false \
     --reference ${reference} \
     --bqsr-recal-file ${name}.recalibration_report.grp
 
+    sambamba index \
+    --nthreads=${task.cpus} \
+    ${name}.preprocessed.bam ${name}.preprocessed.bai
+
     echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
+    sambamba --version >> software_versions.${task.process}.txt
     """
 }
 
