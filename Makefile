@@ -6,6 +6,7 @@ clean:
 	rm -rf .nextflow*
 
 test:
+	bash tests/test_11.sh
 	bash tests/test_00.sh
 	bash tests/test_01.sh
 	bash tests/test_02.sh
@@ -17,4 +18,3 @@ test:
 	bash tests/test_08.sh
 	bash tests/test_09.sh
 	bash tests/test_10.sh
-	bash tests/test_11.sh
