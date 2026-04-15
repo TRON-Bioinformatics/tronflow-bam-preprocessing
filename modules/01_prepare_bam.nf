@@ -29,7 +29,6 @@ process PREPARE_BAM {
     --threads ${params.prepare_bam_cpus} \
     -o ${name}.sorted.bam ${bam}
     
-    echo "Step 1: AddOrReplaceReadGroups"
     gatk AddOrReplaceReadGroups \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --VALIDATION_STRINGENCY SILENT \
@@ -45,7 +44,6 @@ process PREPARE_BAM {
     samtools quickcheck ${name}.rg.bam
     rm -f ${name}.sorted.bam
     
-    echo "Step 2: CleanSam"
     gatk CleanSam \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --INPUT ${name}.rg.bam \
@@ -54,7 +52,6 @@ process PREPARE_BAM {
     samtools quickcheck ${name}.cleaned.bam
     rm ${name}.rg.bam
     
-    echo "Step 3: ReorderSam"
     gatk ReorderSam \
       --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
       --INPUT ${name}.cleaned.bam \
@@ -64,8 +61,7 @@ process PREPARE_BAM {
     samtools quickcheck ${name}.prepared.bam
     rm ${name}.cleaned.bam
     
-    echo "Done."
-    
+  
     echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
     """
