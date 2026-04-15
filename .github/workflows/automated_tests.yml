@@ -7,8 +7,8 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
+    - uses: actions/checkout@v6
+    - uses: actions/setup-java@v5
       with:
         distribution: 'zulu' # See 'Supported distributions' for available options
         java-version: '17'
@@ -29,5 +29,4 @@ jobs:
         key: ${{ runner.os }}-tronflow-bam-preprocessing
     - name: Run tests
       run: |
-        export NXF_VER=22.04.5
         make
