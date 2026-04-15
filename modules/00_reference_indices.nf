@@ -9,9 +9,6 @@ process CREATE_FAIDX {
     input:
     val(reference)
 
-    output:
-    path("*.fai")
-
     script:
     """
     samtools faidx ${reference}
@@ -27,9 +24,6 @@ process CREATE_DICT {
 
     input:
     val(reference)
-
-    output:
-    path("*.dict")
 
     script:
     """
