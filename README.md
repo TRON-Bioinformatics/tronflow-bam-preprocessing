@@ -60,13 +60,13 @@ Usage:
 
 Input:
     * --input_bam: the path to a single BAM (this option is not compatible with --input_files)
-    * --input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file (this option is not compatible with --input_bam)
+    * --input_files: the path to a tab-separated values file containing in each row the sample name, sample type (eg: tumor or normal) and path to the BAM file. The sample name should be unique for each bam file. (this option is not compatible with --input_bam)
     Sample type will be added to the BAM header @SN sample name
     The input file does not have header!
     Example input file:
-    name1       tumor   tumor.1.bam
-    name1       normal  normal.1.bam
-    name2       tumor   tumor.2.bam
+    name1_t   tumor   tumor.1.bam
+    name1_n   normal  normal.1.bam
+    name2_t   tumor   tumor.2.bam
     * --reference: path to the FASTA genome reference (indexes expected *.fai, *.dict)
 
 Optional input:
@@ -84,6 +84,8 @@ Optional input:
     * --skip_metrics: optionally skip metrics (default: false)
     * --output: the folder where to publish output (default: ./output)
     * --platform: the platform to be added to the BAM header. Valid values: [ILLUMINA, SOLID, LS454, HELICOS and PACBIO] (default: ILLUMINA)
+    * --split_cigarn: split reads that contain Ns in their cigar string (e.g. spanning splicing events in RNAseq data) using GATKs SplitNCigarReads
+    * --split_cigarn_args: additional arguments for SplitNCigarReads
 
 Computational resources:
     * --prepare_bam_cpus: (default: 3)
