@@ -2,47 +2,12 @@
 
 nextflow.enable.dsl = 2
 
-include { PREPARE_BAM; INDEX_BAM } from './modules/01_prepare_bam'
+include { PREPARE_BAM; SORT_AND_INDEX_BAM } from './modules/01_prepare_bam'
 include { MARK_DUPLICATES; SPLIT_CIGAR_N_READS } from './modules/02_mark_duplicates'
 include { METRICS; HS_METRICS; COVERAGE_ANALYSIS; FLAGSTAT } from './modules/03_metrics'
 include { REALIGNMENT_AROUND_INDELS } from './modules/04_realignment_around_indels'
 include { BQSR; CREATE_OUTPUT } from './modules/05_bqsr'
 include { CREATE_FAIDX; CREATE_DICT } from './modules/00_reference_indices'
-
-params.help= false
-params.input_files = false
-params.input_name = "normal"
-params.input_bam = false
-params.reference = false
-params.dbsnp = false
-params.known_indels1 = false
-params.known_indels2 = false
-params.intervals = false
-params.skip_bqsr = false
-params.skip_realignment = false
-params.skip_deduplication = false
-params.remove_duplicates = true
-params.skip_metrics = false
-params.output = 'output'
-params.platform = "ILLUMINA"
-params.collect_hs_metrics_min_base_quality = false
-params.collect_hs_metrics_min_mapping_quality = false
-params.split_cigarn = false
-
-// computational resources
-params.prepare_bam_cpus = 3
-params.prepare_bam_memory = "8g"
-params.mark_duplicates_cpus = 2
-params.mark_duplicates_memory = "16g"
-params.realignment_around_indels_cpus = 2
-params.realignment_around_indels_memory = "31g"
-params.bqsr_cpus = 3
-params.bqsr_memory = "4g"
-params.metrics_cpus = 1
-params.metrics_memory = "8g"
-params.index_cpus = 1
-params.index_memory = "8g"
-
 
 
 def helpMessage() {
@@ -84,27 +49,27 @@ else if (params.input_files) {
 }
 
 workflow CHECK_REFERENCE {
+
     take:
         reference
-
-    emit:
-        checked_reference = reference
-
     main:
-        // checks the reference and its indexes, if the indexes are not there creates them
         reference_file = file(reference)
-        if (reference_file.isEmpty()) {
-            log.error "--reference points to a non existing file"
-            exit 1
+
+        if (!reference_file.exists()) {
+            error "--reference points to a non existing file"
         }
-        faidx = file("${reference}.fai")
-        if (faidx.isEmpty()) {
+
+        if (!file("${reference}.fai").exists()) {
             CREATE_FAIDX(reference)
         }
-        dict =  file("${reference_file.getParent() }/${reference_file.baseName }*.dict")
-        if (dict.isEmpty()) {
+
+        dict_file = reference.toString().replaceFirst(/\.(fa|fasta)$/, ".dict")
+
+        if (!file(dict_file).exists()) {
             CREATE_DICT(reference)
         }
+    emit:
+        checked_reference = reference
 }
 
 
@@ -112,15 +77,21 @@ workflow {
 
     CHECK_REFERENCE(params.reference)
 
-    PREPARE_BAM(input_files, CHECK_REFERENCE.out.checked_reference)
+    if (params.skip_prepare_bam) {
+        processed_bams = input_files
+    }
+    else {
+        PREPARE_BAM(input_files, CHECK_REFERENCE.out.checked_reference)
+        processed_bams = PREPARE_BAM.out.prepared_bams
+    }
 
     if (!params.skip_deduplication) {
-        MARK_DUPLICATES(PREPARE_BAM.out.prepared_bams)
+        MARK_DUPLICATES(processed_bams)
         deduplicated_bams = MARK_DUPLICATES.out.deduplicated_bams
     }
     else {
-        INDEX_BAM(PREPARE_BAM.out.prepared_bams)
-        deduplicated_bams = INDEX_BAM.out.indexed_bams
+        SORT_AND_INDEX_BAM(processed_bams)
+        deduplicated_bams = SORT_AND_INDEX_BAM.out.sorted_and_indexed_bams
     }
 
     if (params.split_cigarn) {

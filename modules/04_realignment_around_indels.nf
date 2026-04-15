@@ -1,10 +1,3 @@
-params.realignment_around_indels_cpus = 2
-params.realignment_around_indels_memory = "31g"
-params.known_indels1 = false
-params.known_indels2 = false
-params.output = 'output'
-
-
 process REALIGNMENT_AROUND_INDELS {
     cpus "${params.realignment_around_indels_cpus}"
     memory "${params.realignment_around_indels_memory}"
@@ -14,7 +7,7 @@ process REALIGNMENT_AROUND_INDELS {
 
     // NOTE: this dependency is fixed to GATK 3 as the realignment around indels is not anymore maintained in GATK 4
     // but still for some reason for GATK 3 to work the dependency to GATK 4.2.0.0 is needed
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.0.0 bioconda::gatk=3.8" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_realignment_version} bioconda::gatk=${params.gatk3_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
@@ -22,8 +15,8 @@ process REALIGNMENT_AROUND_INDELS {
 
     output:
     tuple val(name), val(type), file("${name}.realigned.bam"), file("${name}.realigned.bai"), emit: realigned_bams
-    file("${name}.RA.intervals")
-    file("software_versions.${task.process}.txt")
+    path("${name}.RA.intervals")
+    path("software_versions.${task.process}.txt")
 
     script:
     known_indels1 = params.known_indels1 ? " --known ${params.known_indels1}" : ""

@@ -1,11 +1,3 @@
-params.prepare_bam_cpus = 3
-params.prepare_bam_memory = "8g"
-params.index_cpus = 1
-params.index_memory = "8g"
-params.platform = "ILLUMINA"
-params.output = 'output'
-
-
 /*
 This step sets MAPQ to 0 for all unmapped reads + avoids soft clipping beyond the end of the reference genome
 This step reorders chromosomes in the BAM file according to the provided reference (this step is required for GATK)
@@ -17,7 +9,7 @@ process PREPARE_BAM {
     tag "${name}"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0 bioconda::samtools=1.12" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version} bioconda::samtools=${params.samtools_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam)
@@ -25,58 +17,70 @@ process PREPARE_BAM {
 
     output:
     tuple val(name), val(type), file("${name}.prepared.bam"), emit: prepared_bams
-    file("software_versions.${task.process}.txt")
+    path("software_versions.${task.process}.txt")
 
     script:
     """
     mkdir tmp
 
+    set -euo pipefail
+    
     samtools sort \
     --threads ${params.prepare_bam_cpus} \
     -o ${name}.sorted.bam ${bam}
-
+    
     gatk AddOrReplaceReadGroups \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
     --VALIDATION_STRINGENCY SILENT \
     --INPUT ${name}.sorted.bam \
-    --OUTPUT /dev/stdout \
+    --OUTPUT ${name}.rg.bam \
     --REFERENCE_SEQUENCE ${reference} \
     --RGPU 1 \
     --RGID 1 \
     --RGSM ${type} \
     --RGLB 1 \
-    --RGPL ${params.platform} | \
+    --RGPL ${params.platform}
+    
+    samtools quickcheck ${name}.rg.bam
+    rm -f ${name}.sorted.bam
+    
     gatk CleanSam \
     --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
-    --INPUT /dev/stdin \
-    --OUTPUT /dev/stdout | \
+    --INPUT ${name}.rg.bam \
+    --OUTPUT ${name}.cleaned.bam
+    
+    samtools quickcheck ${name}.cleaned.bam
+    rm ${name}.rg.bam
+    
     gatk ReorderSam \
-    --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
-    --INPUT /dev/stdin \
-    --OUTPUT ${name}.prepared.bam \
-    --SEQUENCE_DICTIONARY ${reference}
-
-    rm -f ${name}.sorted.bam
-
+      --java-options '-Xmx${params.prepare_bam_memory} -Djava.io.tmpdir=./tmp' \
+      --INPUT ${name}.cleaned.bam \
+      --OUTPUT ${name}.prepared.bam \
+      --SEQUENCE_DICTIONARY ${reference}
+    
+    samtools quickcheck ${name}.prepared.bam
+    rm ${name}.cleaned.bam
+    
+  
     echo ${params.manifest} >> software_versions.${task.process}.txt
     gatk --version >> software_versions.${task.process}.txt
     """
 }
 
-process INDEX_BAM {
+process SORT_AND_INDEX_BAM {
     cpus "${params.index_cpus}"
     memory "${params.index_memory}"
     tag "${name}"
     publishDir "${params.output}/${name}", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::sambamba=0.8.2" : null)
+    conda (params.enable_conda ? "bioconda::sambamba=${params.sambamba_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam)
 
     output:
-    tuple val(name), val(type), file("${name}.sorted.bam"), file("${name}.sorted.bam.bai"), emit: indexed_bams
-    file("software_versions.${task.process}.txt")
+    tuple val(name), val(type), file("${name}.sorted.bam"), file("${name}.sorted.bam.bai"), emit: sorted_and_indexed_bams
+    path("software_versions.${task.process}.txt")
 
     script:
     """

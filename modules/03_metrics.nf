@@ -1,11 +1,3 @@
-params.metrics_cpus = 1
-params.metrics_memory = "8g"
-params.collect_hs_metrics_min_base_quality = false
-params.collect_hs_metrics_min_mapping_quality = false
-params.output = 'output'
-params.intervals = false
-
-
 process HS_METRICS {
     cpus params.metrics_cpus
     memory params.metrics_memory
@@ -13,16 +5,16 @@ process HS_METRICS {
     publishDir "${params.output}/${name}/metrics/hs_metrics", mode: "copy"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
 
     output:
-    file("*_metrics") optional true
-    file("*.pdf") optional true
-    file("${name}.hs_metrics.txt")
-    file("software_versions.${task.process}.txt")
+    path("*_metrics", optional: true)
+    path("*.pdf", optional: true)
+    path("${name}.hs_metrics.txt")
+    path("software_versions.${task.process}.txt")
 
     script:
     minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
@@ -58,16 +50,16 @@ process METRICS {
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
     // NOTE: the method CollectMultipleMetrics has a hidden dependency to R for making plots
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0 r::r=3.6.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version} r::r=${params.r_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
     val(reference)
 
     output:
-    file("*_metrics") optional true
-    file("*.pdf") optional true
-    file("software_versions.${task.process}.txt")
+    path("*_metrics", optional: true)
+    path("*.pdf", optional: true)
+    path("software_versions.${task.process}.txt")
 
     """
     mkdir tmp
@@ -98,15 +90,15 @@ process COVERAGE_ANALYSIS {
     publishDir "${params.output}/${name}/metrics/coverage", mode: "copy"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::samtools=1.12" : null)
+    conda (params.enable_conda ? "bioconda::samtools=${params.samtools_version}" : null)
 
     input:
         tuple val(name), val(type), file(bam), file(bai)
 
     output:
-        file("${name}.coverage.tsv")
-        file("${name}.depth.tsv")
-        file("software_versions.${task.process}.txt")
+        path("${name}.coverage.tsv")
+        path("${name}.depth.tsv")
+        path("software_versions.${task.process}.txt")
 
     script:
     minimum_base_quality = params.collect_hs_metrics_min_base_quality ?
@@ -130,14 +122,14 @@ process FLAGSTAT {
     publishDir "${params.output}/${name}/metrics/flagstat", mode: "copy", pattern: "*.flagstat.csv"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::sambamba=0.8.2" : null)
+    conda (params.enable_conda ? "bioconda::sambamba=${params.sambamba_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
 
     output:
-    file("${name}.flagstat.csv")
-    file("software_versions.${task.process}.txt")
+    path("${name}.flagstat.csv")
+    path("software_versions.${task.process}.txt")
 
     script:
     """

@@ -1,26 +1,17 @@
-params.mark_duplicates_cpus = 2
-params.mark_duplicates_memory = "16g"
-params.split_reads_cpus = 2
-params.split_reads_memory = "4g"
-params.remove_duplicates = true
-params.output = 'output'
-params.split_cigarn_args = ""
-
-
 process MARK_DUPLICATES {
     cpus "${params.mark_duplicates_cpus}"
     memory "${params.mark_duplicates_memory}"
     tag "${name}"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::sambamba=0.8.2" : null)
+    conda (params.enable_conda ? "bioconda::sambamba=${params.sambamba_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam)
 
     output:
     tuple val(name), val(type), file("${name}.dedup.bam"), file("${name}.dedup.bam.bai"), emit: deduplicated_bams
-    file("software_versions.${task.process}.txt")
+    path("software_versions.${task.process}.txt")
 
     script:
     remove_duplicates_param = params.remove_duplicates ? "--remove-duplicates" : ""
@@ -58,7 +49,7 @@ process SPLIT_CIGAR_N_READS {
     tag "${name}"
     publishDir "${params.output}/${name}/", mode: "copy", pattern: "software_versions.*"
 
-    conda (params.enable_conda ? "bioconda::gatk4=4.2.5.0" : null)
+    conda (params.enable_conda ? "bioconda::gatk4=${params.gatk4_version}" : null)
 
     input:
     tuple val(name), val(type), file(bam), file(bai)
@@ -66,7 +57,7 @@ process SPLIT_CIGAR_N_READS {
 
     output:
     tuple val(name), val(type), file("${name}.split_cigarn.bam"), file("${name}.split_cigarn.bam.bai"), emit: split_cigarn_bams
-    file("software_versions.${task.process}.txt")
+    path("software_versions.${task.process}.txt")
 
     script:
     """
